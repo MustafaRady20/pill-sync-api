@@ -63,9 +63,9 @@ export class AuthController {
   ) {
     const { access_token } = await this.authService.googleLogin(req.user);
 
-    return res.json({
+    return {
     token: access_token,
     user: req.user,
-  });
+  };
   }
 }

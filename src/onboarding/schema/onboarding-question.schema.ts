@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export enum OnboardingQuestionType {
   SINGLE = 'single_choice',
@@ -8,10 +8,13 @@ export enum OnboardingQuestionType {
   BOOLEAN = 'boolean',
 }
 
+export type OnboardingQuestionDocumnet = OnboardingQuestion & Document
 
 @Schema({ timestamps: true })
-export class OnboardingQuestion extends Document {
-
+export class OnboardingQuestion  {
+  @Prop({ required: true, unique: true })
+  key: string;
+  
   @Prop({ required: true })
   text: string;
 
@@ -31,19 +34,19 @@ export class OnboardingQuestion extends Document {
   isRequired: boolean;
 
   @Prop({
-  type: {
-    min: Number,
-    max: Number,
-    regex: String,
-  },
-})
-validation?: {
-  min?: number;
-  max?: number;
-  regex?: string;
-};
-
+    type: {
+      min: Number,
+      max: Number,
+      regex: String,
+    },
+  })
+  validation?: {
+    min?: number;
+    max?: number;
+    regex?: string;
+  };
 }
 
-export const OnboardingQuestionSchema = SchemaFactory.createForClass(OnboardingQuestion)
+export const OnboardingQuestionSchema =
+  SchemaFactory.createForClass(OnboardingQuestion);
 OnboardingQuestionSchema.index({ order: 1, isActive: 1 });

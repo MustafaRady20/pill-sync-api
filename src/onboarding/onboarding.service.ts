@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { OnboardingQuestion } from './schemas/onboarding-question.schema';
-import { CreateOnboardingQuestionDto } from './dto/create-onboarding-question.dto';
 import { UpdateOnboardingQuestionDto } from './dto/update-onboarding-question.dto';
+import { OnboardingQuestion, OnboardingQuestionDocumnet } from './schema/onboarding-question.schema';
+import { CreateOnboardingQuestionDto } from './dto/create-onboarding-question.dto';
 
 @Injectable()
 export class OnboardingQuestionService {
   constructor(
     @InjectModel(OnboardingQuestion.name)
-    private readonly questionModel: Model<OnboardingQuestion>,
+    private readonly questionModel: Model<OnboardingQuestionDocumnet>,
   ) {}
 
   async create(dto: CreateOnboardingQuestionDto) {

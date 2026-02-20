@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { Schema as MongooseSchema } from 'mongoose';
 
 export type PatientAnswerDocument = PatientAnswer & Document;
 
@@ -11,7 +12,7 @@ export class PatientAnswer {
   @Prop({ required: true })
   questionKey: string; 
 
-  @Prop({ required: true })
+  @Prop({ type: MongooseSchema.Types.Mixed })
   value: string | number | boolean | string[]; 
 
   @Prop({ default: null })
