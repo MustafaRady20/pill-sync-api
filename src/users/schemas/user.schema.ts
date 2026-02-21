@@ -8,15 +8,15 @@ export type UserDocument = User & Document;
   timestamps: true,
 })
 export class User {
-  @ApiProperty({ example: 'uuid-string' })
-  _id: string;
-
   @ApiProperty({ example: 'user@gmail.com' })
   @Prop({ required: true, unique: true, index: true })
   email: string;
 
   @Prop({ nullable: true })
   password?: string;
+
+  @Prop({ type: String, enum: ['Doctor', 'patient'], default: 'patient' })
+  role?: string;
 
   @ApiProperty({ example: 'John', required: false })
   @Prop()
