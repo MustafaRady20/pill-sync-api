@@ -1,54 +1,33 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  Query,
-} from '@nestjs/common';
-import { CreateOnboardingQuestionDto } from './dto/create-onboarding-question.dto';
-import { UpdateOnboardingQuestionDto } from './dto/update-onboarding-question.dto';
-import { OnboardingQuestionService } from './onboarding.service';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { OnboardingService } from './onboarding.service';
+import { SubmitAnswersDto } from './dto/submit-answers.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
+import type { UserDocument } from 'src/users/schemas/user.schema';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
-@Controller('onboarding-questions')
-export class OnboardingQuestionController {
-  constructor(private readonly service: OnboardingQuestionService) {}
+@ApiTags('Onboarding')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('onboarding')
+export class OnboardingController {
+  constructor(private onboardingService: OnboardingService) {}
 
-  @Post()
-  create(@Body() dto: CreateOnboardingQuestionDto) {
-    return this.service.create(dto);
+  @Get('questions')
+  @ApiOperation({ summary: 'Get all active onboarding questions in order' })
+  getQuestions() {
+    return this.onboardingService.getActiveQuestions();
   }
 
-  @Get()
-  findAll(@Query('activeOnly') activeOnly: string) {
-    return this.service.findAll(activeOnly !== 'false');
+  @Post('submit')
+  @ApiOperation({ summary: 'Patient submits their onboarding answers' })
+  submitAnswers(@CurrentUser() user: UserDocument, @Body() dto: SubmitAnswersDto) {
+    return this.onboardingService.submitAnswers(user._id.toString(), dto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() dto: UpdateOnboardingQuestionDto,
-  ) {
-    return this.service.update(id, dto);
-  }
-
-  @Delete(':id')
-  delete(@Param('id') id: string) {
-    return this.service.delete(id);
-  }
-
-  @Patch(':id/order')
-  reorder(
-    @Param('id') id: string,
-    @Body('order') order: number,
-  ) {
-    return this.service.reorder(id, order);
+  @Get('my-answers')
+  @ApiOperation({ summary: 'Get current patient onboarding answers' })
+  getMyAnswers(@CurrentUser() user: UserDocument) {
+    return this.onboardingService.getPatientAnswers(user._id.toString());
   }
 }

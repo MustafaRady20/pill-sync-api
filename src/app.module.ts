@@ -1,31 +1,40 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
+import { AuthModule } from './auth/auth.module';
 import { UserModule } from './users/users.module';
 import { DrugModule } from './drug/drug.module';
+import { DiseaseModule } from './diseases/diseases.module';
+import { InteractionsModule } from './interactions/interactions.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
-import { PatientAnswersModule } from './patient-answers/patient-answers.module';
-import { SharedModule } from './shared-module/shared-module.module';
+import { PrescriptionsModule } from './prescriptions/prescriptions.module';
+import { PatientProfileModule } from './patient-profile/patient-profile.module';
+
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    // ── Config ────────────────────────────────────────────────────────────
+    ConfigModule.forRoot({ isGlobal: true }),
+
+    // ── Database ──────────────────────────────────────────────────────────
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.getOrThrow('DATABASE_HOST'),
-      }),
       inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('MONGODB_URI'),
+      }),
     }),
+
+    // ── Feature Modules ───────────────────────────────────────────────────
     AuthModule,
     UserModule,
     DrugModule,
+    DiseaseModule,
+    InteractionsModule,
     OnboardingModule,
-    PatientAnswersModule,
-    SharedModule,
+    PrescriptionsModule,
+    PatientProfileModule,
   ],
 })
 export class AppModule {}
