@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 
 export type UserDocument = User & Document;
@@ -17,6 +17,7 @@ export enum AuthProvider {
 
 @Schema({ timestamps: true })
 export class User {
+ 
   @ApiProperty({ example: 'user@gmail.com' })
   @Prop({ required: true, unique: true, index: true, lowercase: true, trim: true })
   email: string;
@@ -42,7 +43,7 @@ export class User {
 
   @ApiProperty({ example: 'https://avatar.url', required: false })
   @Prop()
-  avatarUrl?: string;
+  avatar?: string;
 
   @ApiProperty({ enum: AuthProvider, default: AuthProvider.LOCAL })
   @Prop({ type: String, enum: AuthProvider, default: AuthProvider.LOCAL })
@@ -59,6 +60,10 @@ export class User {
   @ApiProperty({ example: false })
   @Prop({ default: false })
   hasCompletedOnboarding: boolean;
+
+  @Prop({ default: null })
+  refreshToken: string; 
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+

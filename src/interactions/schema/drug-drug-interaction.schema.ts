@@ -9,6 +9,15 @@ export enum DrugInteractionSeverity {
   MAJOR = 'major',       
 }
 
+
+export enum DrugInteractionRelation {
+  MINOR = 'Indication',       
+  MODERATE = 'moderate', 
+  MAJOR = 'major',       
+}
+
+
+
 @Schema({ timestamps: true })
 export class DrugDrugInteraction {
 

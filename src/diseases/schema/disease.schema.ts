@@ -6,7 +6,7 @@ export type DiseaseDocument = Disease & Document;
 @Schema({ timestamps: true })
 export class Disease {
 
-  @Prop({ type: String, unique: true, sparse: true, uppercase: true, trim: true })
+  @Prop({ type: String, sparse: true, uppercase: true, trim: true })
   diseaseCode?: string;
 
   @Prop({ type: String, required: true, index: true, trim: true })

@@ -7,9 +7,13 @@ import {
 } from 'class-validator';
 
 export class RegisterDto {
-  @IsEmail()
+ @IsEmail()
   @IsNotEmpty()
   email: string;
+
+  @IsString()
+  @IsOptional()
+  role: string;
 
   @IsString()
   @MinLength(6)
@@ -23,6 +27,18 @@ export class RegisterDto {
   @IsString()
   @IsOptional()
   lastName?: string;
+
+  @IsString()
+  @IsOptional()
+  googleId?: string;
+
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  provider?: string;
 }
 
 export class LoginDto {

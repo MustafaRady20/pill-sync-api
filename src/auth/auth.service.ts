@@ -1,82 +1,121 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/users/users.service';
-import { User } from 'src/users/schemas/user.schema';
+import { ConfigService } from '@nestjs/config';
+import { OAuth2Client } from 'google-auth-library';
+import { UsersService } from '../users/users.service';
+import { UserDocument } from '../users/schemas/user.schema';
+import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto ';
 
 @Injectable()
 export class AuthService {
+  private googleClient: OAuth2Client;
+
   constructor(
-    private readonly userService: UserService,
-    private readonly jwtService: JwtService,
-  ) {}
-
-  async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.userService.findByEmail(email);
-
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    if (!user.password) {
-      throw new UnauthorizedException(
-        'Please login using Google OAuth',
-      );
-    }
-
-    const isPasswordValid = await this.userService.validatePassword(
-      password,
-      user.password,
+    private usersService: UsersService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {
+    this.googleClient = new OAuth2Client(
+      this.configService.get<string>('GOOGLE_CLIENT_ID'),
     );
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    if (!user.isActive) {
-      throw new UnauthorizedException('Account is deactivated');
-    }
-
-    const { password: _, ...result } = user;
-    return result;
   }
 
-  async login(user: User) {
-    const payload = {
-      email: user.email,
-      sub: user._id,
-    };
-
-    return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        avatarUrl: user.avatarUrl,
-        provider: user.provider,
-      },
-    };
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<UserDocument | null> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user || !user.password) return null;
+    const isMatch = await bcrypt.compare(password, user.password);
+    return isMatch ? user : null;
   }
 
-  async register(registerDto: RegisterDto) {
-    const user = await this.userService.create({
-      email: registerDto.email,
-      password: registerDto.password,
-      firstName: registerDto.firstName,
-      lastName: registerDto.lastName,
-      provider: 'local',
+  async register(dto: RegisterDto) {
+    const user = await this.usersService.create(dto);
+    const tokens = await this.generateTokens(user);
+    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
+    return { user: user.toJSON(), ...tokens };
+  }
+
+  async login(user: UserDocument) {
+    const tokens = await this.generateTokens(user);
+    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
+    return { user: user.toJSON(), ...tokens };
+  }
+
+  async googleAuth(idToken: string) {
+    const ticket = await this.googleClient
+      .verifyIdToken({
+        idToken,
+        audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+      })
+      .catch(() => {
+        throw new BadRequestException('Invalid Google token');
+      });
+
+    const payload = ticket.getPayload();
+    if (!payload?.email) {
+      throw new BadRequestException('Could not extract profile from Google token');
+    }
+
+    const user = await this.usersService.findOrCreateGoogleUser({
+      googleId: payload.sub,
+      email: payload.email,
+      name: payload.name ?? payload.email.split('@')[0],
+      avatar: payload.picture || "",
     });
 
-    return this.login(user);
+    const tokens = await this.generateTokens(user);
+    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
+    return { user: user.toJSON(), ...tokens };
   }
 
-  async googleLogin(user: User) {
-    return this.login(user);
+  async logout(userId: string) {
+    await this.usersService.updateRefreshToken(userId, null);
+    return { message: 'Logged out successfully' };
   }
 
-  async validateGoogleUser(profile: any): Promise<User> {
-    return this.userService.findOrCreateGoogleUser(profile);
+  async refreshTokens(userId: string, refreshToken: string) {
+    const isValid = await this.usersService.validateRefreshToken(
+      userId,
+      refreshToken,
+    );
+    if (!isValid) throw new ForbiddenException('Invalid refresh token');
+
+    const user = await this.usersService.findById(userId);
+    if (!user || !user.isActive) throw new UnauthorizedException();
+
+    const tokens = await this.generateTokens(user);
+    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
+    return tokens;
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.usersService.findById(userId);
+    if (!user) throw new UnauthorizedException();
+    return user.toJSON();
+  }
+
+  private async generateTokens(user: UserDocument) {
+    const payload = { sub: user._id.toString(), email: user.email };
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get('JWT_ACCESS_SECRET'),
+        expiresIn: this.configService.get('JWT_ACCESS_EXPIRY'),
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get('JWT_REFRESH_EXPIRY'),
+      }),
+    ]);
+
+    return { accessToken, refreshToken };
   }
 }

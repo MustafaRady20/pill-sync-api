@@ -1,71 +1,65 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   UseGuards,
-  Request,
-  Get,
-  Res,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
-import type { Response } from 'express';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBody,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
-
 import { AuthService } from './auth.service';
-import { ConfigService } from '@nestjs/config';
-import { GoogleAuthGuard } from './guards/google.auth.guard';
-import { LoginDto, RegisterDto } from './dto/register.dto ';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
+import { CurrentUser } from './decorators/current-user.decorator';
+import * as userSchema from '../users/schemas/user.schema';
+import { RegisterDto } from './dto/register.dto ';
 import { LocalAuthGuard } from './guards/local auth.guard';
+import { JwtAuthGuard } from './guards/jwt.auth.guard';
 
-@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
-  @ApiOperation({ summary: 'Register new user (email/password)' })
-  @ApiBody({ type: RegisterDto })
-  @ApiResponse({ status: 201, description: 'User registered successfully' })
   @Post('register')
-  async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
   }
 
-  @ApiOperation({ summary: 'Login with email and password' })
-  @ApiBody({ type: LoginDto })
-  @ApiResponse({ status: 200, description: 'Login successful' })
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  @HttpCode(HttpStatus.OK)
+  async login(@CurrentUser() user: userSchema.UserDocument) {
+    return this.authService.login(user);
   }
 
-  @ApiOperation({ summary: 'Login with Google' })
-  @ApiResponse({ status: 302, description: 'Redirects to Google OAuth' })
-  @Get('google')
-  @UseGuards(GoogleAuthGuard)
-  async googleAuth() {}
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  async googleAuth(@Body() dto: GoogleAuthDto) {
+    return this.authService.googleAuth(dto.idToken);
+  }
 
-  @ApiOperation({ summary: 'Google OAuth callback' })
-  @ApiResponse({ status: 302, description: 'Redirects to frontend with token' })
-  @Get('google/callback')
-  @UseGuards(GoogleAuthGuard)
-  async googleAuthCallback(
-    @Request() req,
-    @Res() res: Response,
-  ) {
-    const { access_token } = await this.authService.googleLogin(req.user);
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@CurrentUser() user: userSchema.UserDocument) {
+    return this.authService.logout(user._id.toString());
+  }
 
-    return {
-    token: access_token,
-    user: req.user,
-  };
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Body() dto: RefreshTokenDto) {
+    const payload = this.decodeToken(dto.refreshToken);
+    return this.authService.refreshTokens(payload.sub, dto.refreshToken);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  async profile(@CurrentUser() user: userSchema.UserDocument) {
+    return this.authService.getProfile(user._id.toString());
+  }
+
+  private decodeToken(token: string) {
+    const base64 = token.split('.')[1];
+    return JSON.parse(Buffer.from(base64, 'base64').toString());
   }
 }

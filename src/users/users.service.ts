@@ -5,111 +5,91 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { User, UserDocument, AuthProvider } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
-
-import { User, UserDocument } from './schemas/user.schema';
-import { CreateUserDto } from './dto/user.dto';
+import { RegisterDto } from 'src/auth/dto/register.dto ';
 
 @Injectable()
-export class UserService {
+export class UsersService {
   constructor(
     @InjectModel(User.name)
-    private readonly userModel: Model<UserDocument>,
+    private userModel: Model<UserDocument>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.userModel.findOne({
-      email: createUserDto.email,
-    });
+  async create(
+    dto: RegisterDto
+  ): Promise<UserDocument> {
+    const existing = await this.findByEmail(dto.email);
+    if (existing) throw new ConflictException('Email already in use');
 
-    if (existingUser) {
-      throw new ConflictException('User with this email already exists');
-    }
-
-    let hashedPassword: string | undefined;
-    if (createUserDto.password) {
-      hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    }
-
+    const hashed = await bcrypt.hash(dto.password, 10);
     const user = new this.userModel({
-      ...createUserDto,
-      password: hashedPassword,
+      email: dto.email,
+      password: hashed,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      provider: AuthProvider.LOCAL,
     });
-
     return user.save();
   }
 
-  async findByEmail(email: string): Promise<UserDocument |null> {
-     return this.userModel.findOne({ email }).exec();
-    
-  }
+  // ─── Google Sign-In ────────────────────────────────────────────────────────
+  async findOrCreateGoogleUser(profile: {
+    googleId: string;
+    email: string;
+    name: string;
+    avatar: string;
+  }): Promise<UserDocument> {
+    // 1. Find by googleId
+    let user = await this.userModel.findOne({ googleId: profile.googleId });
+    if (user) return user;
 
-  async findByGoogleId(googleId: string): Promise<UserDocument | null> {
-   return  this.userModel.findOne({ googleId }).exec();
-   
-    
-  }
-
-  async findById(id: string): Promise<User> {
-    const user = await this.userModel.findById(id).exec();
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    return user;
-  }
-
-  async findOrCreateGoogleUser(profile: any): Promise<User> {
-    let user = await this.findByGoogleId(profile.id);
-
+    // 2. Link Google to existing local account (same email)
+    user = await this.userModel.findOne({ email: profile.email });
     if (user) {
-      return user;
-    }
-
-    const email = profile.emails?.[0]?.value;
-
-    // 2️⃣ Try email
-    user = await this.findByEmail(email);
-
-    if (user) {
-      user.googleId = profile.id;
-      user.provider = 'google';
-      user.avatarUrl = profile.photos?.[0]?.value;
-      user.isEmailVerified = true;
-
+      user.googleId = profile.googleId;
+      user.provider = AuthProvider.GOOGLE;
+      if (!user.avatar) user.avatar = profile.avatar;
       return user.save();
     }
 
+    // 3. Create brand new Google user
     const newUser = new this.userModel({
-      email,
-      googleId: profile.id,
-      firstName: profile.name?.givenName,
-      lastName: profile.name?.familyName,
-      avatarUrl: profile.photos?.[0]?.value,
-      provider: 'google',
-      isEmailVerified: true,
+      email: profile.email,
+      name: profile.name,
+      avatar: profile.avatar,
+      googleId: profile.googleId,
+      provider: AuthProvider.GOOGLE,
     });
-
     return newUser.save();
   }
 
-  async validatePassword(
-    plainPassword: string,
-    hashedPassword: string,
-  ): Promise<boolean> {
-    return bcrypt.compare(plainPassword, hashedPassword);
+  // ─── Finders ──────────────────────────────────────────────────────────────
+  async findByEmail(email: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ email: email.toLowerCase() });
   }
 
-  async updateUser(id: string, updateData: Partial<User>): Promise<User> {
-    const user = await this.userModel.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
+  async findById(id: string): Promise<UserDocument | null> {
+    return this.userModel.findById(id);
+  }
 
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+  // ─── Refresh Token ─────────────────────────────────────────────────────────
+  async updateRefreshToken(
+    userId: string,
+    token: string | null,
+  ): Promise<void> {
+    const hashed = token ? await bcrypt.hash(token, 10) : null;
+    await this.userModel.findByIdAndUpdate(userId, { refreshToken: hashed });
+  }
 
-    return user;
+  async validateRefreshToken(
+    userId: string,
+    token: string,
+  ): Promise<boolean> {
+    const user = await this.userModel
+      .findById(userId)
+      .select('+refreshToken');
+    if (!user?.refreshToken) return false;
+    return bcrypt.compare(token, user.refreshToken);
   }
 }

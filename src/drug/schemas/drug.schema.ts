@@ -30,8 +30,8 @@ export enum DrugRoute {
 
 @Schema({ timestamps: true })
 export class Drug {
-  @Prop({ type: String, required: true, unique: true, index: true, trim: true })
-  senomeCode: string;
+  @Prop({ type: String, required: true, index: true, trim: true })
+  senomeCode: string;  
 
   @Prop({ type: String, required: true, index: true, trim: true })
   tradeName: string;

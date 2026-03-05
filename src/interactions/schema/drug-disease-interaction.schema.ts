@@ -7,8 +7,11 @@ export enum InteractionRelation {
   INDICATION = 'Indication',         // drug is used TO TREAT the disease
   SIDE_EFFECT = 'Side-Effect',       // drug may CAUSE the disease/condition
   CONTRAINDICATION = 'Contraindication', // drug is FORBIDDEN in presence of disease
-  CAUTION = 'Caution',               // drug requires extra monitoring
+  CAUTION = 'Caution',                   // drug requires extra monitoring
+  SAFE = 'Safe',               
 }
+
+// لم يتم العثور على تفاعلات بينهم 
 
 export enum InteractionSeverity {
   MILD = 'mild',
