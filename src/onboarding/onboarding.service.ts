@@ -49,56 +49,56 @@ export class OnboardingService {
    *   4. Run risk scorer → updates riskScore on each answer
    *   5. Mark user.hasCompletedOnboarding = true
    */
-  async submitAnswers(patientId: string, dto: SubmitAnswersDto): Promise<{ message: string }> {
-    const questions = await this.questionModel.find({ isActive: true }).lean();
-    const questionMap = new Map(questions.map((q) => [q.key, q]));
+  // async submitAnswers(patientId: string, dto: SubmitAnswersDto): Promise<{ message: string }> {
+  //   const questions = await this.questionModel.find({ isActive: true }).lean();
+  //   const questionMap = new Map(questions.map((q) => [q.key, q]));
 
-    // 1. Validate required questions
-    const requiredKeys = questions.filter((q) => q.isRequired).map((q) => q.key);
-    const answeredKeys = new Set(dto.answers.map((a) => a.questionKey));
-    const missing = requiredKeys.filter((k) => !answeredKeys.has(k));
-    if (missing.length) {
-      throw new BadRequestException(`Missing required answers: ${missing.join(', ')}`);
-    }
+  //   // 1. Validate required questions
+  //   const requiredKeys = questions.filter((q) => q.isRequired).map((q) => q.key);
+  //   const answeredKeys = new Set(dto.answers.map((a) => a.questionKey));
+  //   const missing = requiredKeys.filter((k) => !answeredKeys.has(k));
+  //   if (missing.length) {
+  //     throw new BadRequestException(`Missing required answers: ${missing.join(', ')}`);
+  //   }
 
-    // 2. Upsert answers
-    const upsertOps = dto.answers.map((answer) => {
-      const question = questionMap.get(answer.questionKey);
-      if (!question) throw new BadRequestException(`Unknown question key: ${answer.questionKey}`);
+  //   // 2. Upsert answers
+  //   const upsertOps = dto.answers.map((answer) => {
+  //     const question = questionMap.get(answer.questionKey);
+  //     if (!question) throw new BadRequestException(`Unknown question key: ${answer.questionKey}`);
 
-      const riskScore = this.riskScorer.score(question, answer.value);
+  //     const riskScore = this.riskScorer.score(question, answer.value);
 
-      return {
-        updateOne: {
-          filter: { patientId: new Types.ObjectId(patientId), questionKey: answer.questionKey },
-          update: {
-            $set: {
-              value: answer.value,
-              normalizedValue: this.normalize(answer.value),
-              riskScore,
-            },
-          },
-          upsert: true,
-        },
-      };
-    });
+  //     return {
+  //       updateOne: {
+  //         filter: { patientId: new Types.ObjectId(patientId), questionKey: answer.questionKey },
+  //         update: {
+  //           $set: {
+  //             value: answer.value,
+  //             normalizedValue: this.normalize(answer.value),
+  //             riskScore,
+  //           },
+  //         },
+  //         upsert: true,
+  //       },
+  //     };
+  //   });
 
-    await this.answerModel.bulkWrite(upsertOps);
+  //   await this.answerModel.bulkWrite(upsertOps);
 
-    // 3. Extract allergies from answers tagged with ALLERGIES category
-    const allergyAnswers = dto.answers.filter((a) => {
-      const q = questionMap.get(a.questionKey);
-      return q?.category === OnboardingQuestionCategory.ALLERGIES;
-    });
-    if (allergyAnswers.length) {
-      await this.allergyExtractor.extractAndSave(patientId, allergyAnswers);
-    }
+  //   // 3. Extract allergies from answers tagged with ALLERGIES category
+  //   const allergyAnswers = dto.answers.filter((a) => {
+  //     const q = questionMap.get(a.questionKey);
+  //     return q?.category === OnboardingQuestionCategory.ALLERGIES;
+  //   });
+  //   if (allergyAnswers.length) {
+  //     await this.allergyExtractor.extractAndSave(patientId, allergyAnswers);
+  //   }
 
-    // 5. Mark onboarding complete
-    await this.userModel.findByIdAndUpdate(patientId, { hasCompletedOnboarding: true });
+  //   // 5. Mark onboarding complete
+  //   await this.userModel.findByIdAndUpdate(patientId, { hasCompletedOnboarding: true });
 
-    return { message: 'Onboarding completed successfully' };
-  }
+  //   return { message: 'Onboarding completed successfully' };
+  // }
 
   async getPatientAnswers(patientId: string): Promise<PatientAnswerDocument[]> {
     return this.answerModel.find({ patientId: new Types.ObjectId(patientId) }).lean();

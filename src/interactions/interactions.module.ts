@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+
+import { DrugDrugService } from './drug-drug.service';
 import { DrugDrugInteraction, DrugDrugInteractionSchema } from './schema/drug-drug-interaction.schema';
 import { DrugDiseaseInteraction, DrugDiseaseInteractionSchema } from './schema/drug-disease-interaction.schema';
-import { DrugDrugService } from './drug-drug.service';
 import { DrugDiseaseService } from './drug-disease-interaction.service';
-import { InteractionsController } from './interactions.controller';
-
+import { DrugDiseaseController, DrugDrugController } from './interactions.controller';
 
 @Module({
   imports: [
@@ -14,8 +14,14 @@ import { InteractionsController } from './interactions.controller';
       { name: DrugDiseaseInteraction.name, schema: DrugDiseaseInteractionSchema },
     ]),
   ],
-  controllers: [InteractionsController],
+  controllers: [
+    DrugDrugController,    // /interactions/drug-drug
+    DrugDiseaseController, // /interactions/drug-disease
+  ],
   providers: [DrugDrugService, DrugDiseaseService],
-  exports: [DrugDrugService, DrugDiseaseService], // both consumed by SafetyCheckService
+  exports: [
+    DrugDrugService,    // → SafetyCheckService.checkDrugDrugInteractions()
+    DrugDiseaseService, // → SafetyCheckService.checkDrugDiseaseInteractions()
+  ],
 })
 export class InteractionsModule {}

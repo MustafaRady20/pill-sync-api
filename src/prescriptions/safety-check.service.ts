@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 import { Drug, DrugDocument } from 'src/drug/schemas/drug.schema';
 import { DrugDiseaseInteraction, DrugDiseaseInteractionDocument, InteractionRelation } from 'src/interactions/schema/drug-disease-interaction.schema';
 import { DrugDrugInteraction, DrugDrugInteractionDocument, DrugInteractionSeverity } from 'src/interactions/schema/drug-drug-interaction.schema';
-import { PatientAllergy, PatientAllergyDocument } from 'src/patient-profile/schema/patient-allergy.schema';
+import { PatientAllergy, PatientAllergyDocument } from 'src/patient-allergy/schema/patient-allergy.schema';
 
 
 

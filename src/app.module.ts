@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PassportModule } from '@nestjs/passport';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './users/users.module';
 import { DrugModule } from './drug/drug.module';
@@ -11,6 +9,7 @@ import { InteractionsModule } from './interactions/interactions.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { PrescriptionsModule } from './prescriptions/prescriptions.module';
 import { PatientProfileModule } from './patient-profile/patient-profile.module';
+import { PatientAllergyModule } from './patient-allergy/patient-allergy.module';
 
 
 @Module({
@@ -35,6 +34,7 @@ import { PatientProfileModule } from './patient-profile/patient-profile.module';
     OnboardingModule,
     PrescriptionsModule,
     PatientProfileModule,
+    PatientAllergyModule,
   ],
 })
 export class AppModule {}

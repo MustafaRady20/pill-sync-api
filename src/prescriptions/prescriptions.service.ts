@@ -77,7 +77,7 @@ export class PrescriptionsService {
       allDrugIds,
     );
 
-    prescription.safetyCheckResult = safetyResult;
+    // prescription.safetyCheckResult = safetyResult;
 
     if (safetyResult.passed) {
       prescription.status = PrescriptionStatus.ACTIVE;

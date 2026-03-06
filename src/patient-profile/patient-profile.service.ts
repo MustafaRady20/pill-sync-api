@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { PatientAnswer, PatientAnswerDocument } from './schema/patient-answers.schema';
 import { Prescription, PrescriptionDocument, PrescriptionStatus } from 'src/prescriptions/schema/prescription.schema';
-import { AllergySeverity, PatientAllergy, PatientAllergyDocument } from './schema/patient-allergy.schema';
+import { AllergySeverity, PatientAllergy, PatientAllergyDocument } from '../patient-allergy/schema/patient-allergy.schema';
 
 @Injectable()
 export class PatientProfileService {

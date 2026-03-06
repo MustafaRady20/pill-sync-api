@@ -42,7 +42,7 @@ import { InteractionRelation, InteractionSeverity } from './schema/drug-disease-
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('interactions/drug-drug')
-export class InteractionsController {
+export class DrugDrugController {
   constructor(private readonly drugDrugService: DrugDrugService) {}
 
   @Post()
