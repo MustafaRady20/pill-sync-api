@@ -11,6 +11,10 @@ import { PrescriptionsModule } from './prescriptions/prescriptions.module';
 import { PatientProfileModule } from './patient-profile/patient-profile.module';
 import { PatientAllergyModule } from './patient-allergy/patient-allergy.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { EmailModule } from './email/email.module';
+import { DeviceTokensModule } from './device-tokens/device-tokens.module';
+import { PushModule } from './push/push.module';
+import { QueueModule } from './queue/queue.module';
 
 
 @Module({
@@ -36,7 +40,11 @@ import { NotificationsModule } from './notifications/notifications.module';
     PrescriptionsModule,
     PatientProfileModule,
     PatientAllergyModule,
+    QueueModule,
     NotificationsModule,
+    EmailModule,
+    DeviceTokensModule,
+    PushModule,
   ],
 })
 export class AppModule {}

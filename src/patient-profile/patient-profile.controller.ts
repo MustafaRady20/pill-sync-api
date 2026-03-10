@@ -5,7 +5,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 import { RolesGuard } from 'src/auth/guards/role.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/users/schemas/user.schema';
-import { CreateAllergyDto } from './dto/create-allergy.dto';
+import { CreateAllergyDto } from 'src/patient-allergy/dto/create-allergy.dto';
 
 @ApiTags('Patient Profile')
 @ApiBearerAuth()
