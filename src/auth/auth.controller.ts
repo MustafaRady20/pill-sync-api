@@ -15,6 +15,7 @@ import * as userSchema from '../users/schemas/user.schema';
 import { RegisterDto } from './dto/register.dto ';
 import { LocalAuthGuard } from './guards/local auth.guard';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -28,8 +29,9 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@CurrentUser() user: userSchema.UserDocument) {
-    return this.authService.login(user);
+  async login(@Body() dto: LoginDto) {
+    console.log('Logging in user:', dto.email);
+    return this.authService.login(dto);
   }
 
   @Post('google')

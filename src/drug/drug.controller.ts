@@ -28,7 +28,6 @@ export class DrugController {
     return this.drugService.findAll();
   }
 
-  // search by trade name OR similar trade name
   @Get('search')
   search(@Query('name') name: string) {
     return this.drugService.findByTradeName(name);

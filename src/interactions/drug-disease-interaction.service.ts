@@ -131,10 +131,7 @@ export class DrugDiseaseService {
       .lean();
   }
 
-  /**
-   * Returns all INDICATION interactions for a drug list.
-   * Used to suggest what diseases a drug is approved to treat.
-   */
+
   async findIndicationsForDrugs(
     drugIds: string[],
   ): Promise<DrugDiseaseInteractionDocument[]> {
@@ -149,12 +146,6 @@ export class DrugDiseaseService {
       .lean();
   }
 
-  // ─── Update ───────────────────────────────────────────────────────────────
-
-  /**
-   * Drug and disease refs are immutable after creation.
-   * Only clinical metadata (severity, description, mechanism, etc.) can be updated.
-   */
   async update(
     id: string,
     dto: UpdateDrugDiseaseInteractionDto,

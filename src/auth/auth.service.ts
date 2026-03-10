@@ -11,6 +11,7 @@ import { UsersService } from '../users/users.service';
 import { UserDocument } from '../users/schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto ';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,7 @@ export class AuthService {
     password: string,
   ): Promise<UserDocument | null> {
     const user = await this.usersService.findByEmail(email);
+    console.log('Validating user:', email, 'Found user:', !!user);
     if (!user || !user.password) return null;
     const isMatch = await bcrypt.compare(password, user.password);
     return isMatch ? user : null;
@@ -43,7 +45,11 @@ export class AuthService {
     return { user: user.toJSON(), ...tokens };
   }
 
-  async login(user: UserDocument) {
+  async login(dto: LoginDto) {
+    console.log('Logging in user:', dto.email);
+    const user = await this.validateUser(dto.email, dto.password);
+    if (!user) throw new UnauthorizedException();
+
     const tokens = await this.generateTokens(user);
     await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
     return { user: user.toJSON(), ...tokens };

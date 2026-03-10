@@ -21,7 +21,7 @@ import { PatientAllergyModule } from './patient-allergy/patient-allergy.module';
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        uri: config.get<string>('MONGODB_URI'),
+        uri: config.get<string>('DATABASE_HOST'),
       }),
     }),
 

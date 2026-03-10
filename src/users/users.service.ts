@@ -40,11 +40,9 @@ export class UsersService {
     name: string;
     avatar: string;
   }): Promise<UserDocument> {
-    // 1. Find by googleId
     let user = await this.userModel.findOne({ googleId: profile.googleId });
     if (user) return user;
 
-    // 2. Link Google to existing local account (same email)
     user = await this.userModel.findOne({ email: profile.email });
     if (user) {
       user.googleId = profile.googleId;
@@ -53,7 +51,6 @@ export class UsersService {
       return user.save();
     }
 
-    // 3. Create brand new Google user
     const newUser = new this.userModel({
       email: profile.email,
       name: profile.name,
@@ -64,7 +61,6 @@ export class UsersService {
     return newUser.save();
   }
 
-  // ─── Finders ──────────────────────────────────────────────────────────────
   async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email: email.toLowerCase() });
   }
@@ -73,7 +69,6 @@ export class UsersService {
     return this.userModel.findById(id);
   }
 
-  // ─── Refresh Token ─────────────────────────────────────────────────────────
   async updateRefreshToken(
     userId: string,
     token: string | null,
