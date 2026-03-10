@@ -10,6 +10,7 @@ import { OnboardingModule } from './onboarding/onboarding.module';
 import { PrescriptionsModule } from './prescriptions/prescriptions.module';
 import { PatientProfileModule } from './patient-profile/patient-profile.module';
 import { PatientAllergyModule } from './patient-allergy/patient-allergy.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 
 @Module({
@@ -35,6 +36,7 @@ import { PatientAllergyModule } from './patient-allergy/patient-allergy.module';
     PrescriptionsModule,
     PatientProfileModule,
     PatientAllergyModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
