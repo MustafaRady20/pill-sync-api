@@ -14,7 +14,7 @@ export class UsersService {
   constructor(
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
-  ) {}
+  ) { }
 
   async create(
     dto: RegisterDto
@@ -86,5 +86,12 @@ export class UsersService {
       .select('+refreshToken');
     if (!user?.refreshToken) return false;
     return bcrypt.compare(token, user.refreshToken);
+  }
+
+
+  async markEmailVerified(userId: string): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      $set: { isEmailVerified: true },
+    });
   }
 }

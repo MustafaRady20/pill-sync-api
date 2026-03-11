@@ -53,6 +53,8 @@ export class User {
   @Prop({ default: true })
   isActive: boolean;
 
+
+
   @ApiProperty({ example: false })
   @Prop({ default: false })
   isEmailVerified: boolean;

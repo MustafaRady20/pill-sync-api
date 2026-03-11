@@ -12,6 +12,8 @@ import { UserDocument } from '../users/schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto ';
 import { LoginDto } from './dto/login.dto';
+import { VerificationService } from './verification/verification.service';
+import { VerifyEmailDto } from './dto/verifiyEmail.dto';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +23,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private readonly verificationService: VerificationService,
   ) {
     this.googleClient = new OAuth2Client(
       this.configService.get<string>('GOOGLE_CLIENT_ID'),
@@ -41,9 +44,59 @@ export class AuthService {
   async register(dto: RegisterDto) {
     const user = await this.usersService.create(dto);
     const tokens = await this.generateTokens(user);
-    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
-    return { user: user.toJSON(), ...tokens };
+
+    await this.usersService.updateRefreshToken(
+      user._id.toString(),
+      tokens.refreshToken,
+    );
+
+    await this.verificationService.sendVerificationCode(
+      user._id.toString(),
+      user.email,
+    );
+
+    return {
+      user: user.toJSON(),
+      ...tokens,
+      message: 'Account created. Please check your email for a 6-digit verification code.',
+    };
   }
+
+
+  async verifyEmail(dto: VerifyEmailDto) {
+    const user = await this.usersService.findByEmail(dto.email);
+
+    if (!user) {
+      throw new BadRequestException('User not found.');
+    }
+
+    if (user.isEmailVerified) {
+      return { message: 'Email is already verified.' };
+    }
+
+    await this.verificationService.verifyCode(user._id.toString(), dto.code);
+
+  
+    await this.usersService.markEmailVerified(user._id.toString());
+
+    return { message: 'Email verified successfully.' };
+  }
+
+
+  async resendVerificationCode(email: string) {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) throw new BadRequestException('User not found.');
+    if (user.isEmailVerified) throw new BadRequestException('Email already verified.');
+
+    await this.verificationService.sendVerificationCode(
+      user._id.toString(),
+      user.email,
+    );
+
+    return { message: 'A new verification code has been sent to your email.' };
+  }
+
 
   async login(dto: LoginDto) {
     console.log('Logging in user:', dto.email);

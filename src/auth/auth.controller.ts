@@ -16,14 +16,36 @@ import { RegisterDto } from './dto/register.dto ';
 import { LocalAuthGuard } from './guards/local auth.guard';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
 import { LoginDto } from './dto/login.dto';
+import { ApiOperation } from '@nestjs/swagger';
+import { SendVerificationDto, VerifyEmailDto } from './dto/verifiyEmail.dto';
+import { VerificationService } from './verification/verification.service';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService, 
+    private readonly verificationService: VerificationService, 
+    private readonly usersService: UsersService,
+  ) { }
 
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
+  }
+
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Submit the 6-digit code to verify email' })
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto);
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resend a fresh verification code' })
+  resendCode(@Body() dto: SendVerificationDto) {
+    return this.authService.resendVerificationCode(dto.email);
   }
 
   @UseGuards(LocalAuthGuard)
