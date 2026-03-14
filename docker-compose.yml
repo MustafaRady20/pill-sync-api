@@ -44,3 +44,10 @@ services:
     restart: unless-stopped
     networks:
       - notification-net
+
+volumes:
+  redis-data:
+
+networks:
+  notification-net:
+    driver: bridge
