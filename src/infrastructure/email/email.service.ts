@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { notificationEmailTemplate } from './templates/notification.template';
-import { NotificationDocument } from 'src/modules/notifications/schema/notification.schema';
+import { NotificationDocument } from 'src/infrastructure/notifications/schema/notification.schema';
 
 @Injectable()
 export class EmailService {

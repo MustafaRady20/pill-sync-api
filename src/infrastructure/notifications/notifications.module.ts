@@ -6,8 +6,8 @@ import { NotificationsService, NOTIFICATIONS_QUEUE } from './notifications.servi
 import { NotificationsController } from './notifications.controller';
 import { NotificationProcessor } from './processors/notification.processor';
 import { EmailModule } from '../email/email.module';
-import { PushModule } from '../push/push.module';
 import { Notification, NotificationSchema } from './schema/notification.schema';
+import { PushModule } from '../push/push.module';
 
 @Module({
   imports: [

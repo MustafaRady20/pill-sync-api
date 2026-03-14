@@ -9,7 +9,7 @@ import { UserModule } from 'src/modules/users/users.module';
 import { VerificationService } from './verification/verification.service';
 import { VerificationCode, VerificationCodeSchema } from './verification/schema/verification.code.schema';
 import { MongooseModule } from '@nestjs/mongoose';
-import { EmailModule } from 'src/modules/email/email.module';
+import { EmailModule } from 'src/infrastructure/email/email.module';
 
 @Module({
   imports: [

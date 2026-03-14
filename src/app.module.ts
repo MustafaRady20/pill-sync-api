@@ -10,13 +10,13 @@ import { OnboardingModule } from './modules/onboarding/onboarding.module';
 import { PrescriptionsModule } from './modules/prescriptions/prescriptions.module';
 import { PatientProfileModule } from './modules/patient-profile/patient-profile.module';
 import { PatientAllergyModule } from './modules/patient-allergy/patient-allergy.module';
-import { NotificationsModule } from './modules/notifications/notifications.module';
-import { EmailModule } from './modules/email/email.module';
-import { DeviceTokensModule } from './modules/device-tokens/device-tokens.module';
-import { PushModule } from './modules/push/push.module';
-import { QueueModule } from './queue/queue.module';
-import { RedisModule } from './redis/redis.module';
+import { NotificationsModule } from './infrastructure/notifications/notifications.module';
+import { EmailModule } from './infrastructure/email/email.module';
+import { DeviceTokensModule } from './infrastructure/device-tokens/device-tokens.module';
+import { QueueModule } from './infrastructure/queue/queue.module';
+import { RedisModule } from './infrastructure/redis/redis.module';
 import { CacheModule } from './common/cache/cache.module';
+import { PushModule } from './infrastructure/push/push.module';
 
 
 @Module({

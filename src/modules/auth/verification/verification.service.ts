@@ -9,8 +9,8 @@ import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { VerificationCode, VerificationCodeDocument } from './schema/verification.code.schema';
-import { EmailService } from 'src/modules/email/email.service';
-import { verificationEmailTemplate } from 'src/modules/email/templates/verification.template';
+import { EmailService } from 'src/infrastructure/email/email.service';
+import { verificationEmailTemplate } from 'src/infrastructure/email/templates/verification.template';
 
 const CODE_TTL_MINUTES = 10;
 const MAX_ATTEMPTS = 5; // max wrong guesses before the code is invalidated

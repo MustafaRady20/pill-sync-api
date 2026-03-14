@@ -2,11 +2,11 @@ import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 
-import { PushService } from '../../push/push.service';
 import { EmailService } from '../../email/email.service';
 import { NOTIFICATIONS_QUEUE, NotificationsService, SEND_NOTIFICATION_JOB } from '../notifications.service';
 import { NotificationStatus, NotificationType } from 'src/common/enums/notification-type.enum';
 import { NotificationDocument } from '../schema/notification.schema';
+import { PushService } from 'src/infrastructure/push/push.service';
 
 interface SendNotificationJobData {
   notificationId: string;

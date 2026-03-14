@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as admin from 'firebase-admin';
+import { NotificationDocument } from 'src/infrastructure/notifications/schema/notification.schema';
 import { DeviceTokensService } from '../device-tokens/device-tokens.service';
-import { NotificationDocument } from 'src/modules/notifications/schema/notification.schema';
 
 @Injectable()
 export class PushService {
