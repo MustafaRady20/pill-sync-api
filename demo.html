@@ -1,203 +1,1014 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auth Demo</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        button {
-            padding: 10px 20px;
-            margin-right: 10px;
-            cursor: pointer;
-        }
-        .google-btn {
-            background: #4285f4;
-            color: white;
-            border: none;
-        }
-        .output {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 5px;
-            white-space: pre-wrap;
-        }
-        .section {
-            margin-bottom: 40px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pill-Sync — API Endpoints</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:        #080c10;
+    --surface:   #0e1318;
+    --border:    #1a2230;
+    --border-hi: #243040;
+    --text:      #c8d8e8;
+    --muted:     #4a6070;
+    --dim:       #2a3a4a;
+
+    --get:    #3b82f6;
+    --post:   #22c55e;
+    --patch:  #f97316;
+    --delete: #ef4444;
+
+    --get-bg:    rgba(59,130,246,.08);
+    --post-bg:   rgba(34,197,94,.08);
+    --patch-bg:  rgba(249,115,22,.08);
+    --delete-bg: rgba(239,68,68,.08);
+
+    --patient: #818cf8;
+    --doctor:  #34d399;
+    --admin:   #fb923c;
+    --system:  #a78bfa;
+
+    --patient-bg: rgba(129,140,248,.08);
+    --doctor-bg:  rgba(52,211,153,.08);
+    --admin-bg:   rgba(251,146,60,.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────── */
+  header {
+    padding: 48px 48px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: #fff;
+    line-height: 1;
+  }
+  header h1 span { color: var(--get); }
+  header p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* ── Filter bar ──────────────────────────────────────────────── */
+  .filters {
+    padding: 20px 48px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(8,12,16,.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .filter-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .filter-btn:hover { border-color: var(--border-hi); color: var(--text); }
+  .filter-btn.active { background: var(--border-hi); color: #fff; border-color: var(--border-hi); }
+  .filter-btn.f-get.active    { background: var(--get-bg);    color: var(--get);    border-color: var(--get); }
+  .filter-btn.f-post.active   { background: var(--post-bg);   color: var(--post);   border-color: var(--post); }
+  .filter-btn.f-patch.active  { background: var(--patch-bg);  color: var(--patch);  border-color: var(--patch); }
+  .filter-btn.f-delete.active { background: var(--delete-bg); color: var(--delete); border-color: var(--delete); }
+  .filter-btn.f-patient.active { background: var(--patient-bg); color: var(--patient); border-color: var(--patient); }
+  .filter-btn.f-doctor.active  { background: var(--doctor-bg);  color: var(--doctor);  border-color: var(--doctor); }
+  .filter-btn.f-admin.active   { background: var(--admin-bg);   color: var(--admin);   border-color: var(--admin); }
+
+  /* ── Main layout ─────────────────────────────────────────────── */
+  main { padding: 40px 48px; display: flex; flex-direction: column; gap: 48px; }
+
+  /* ── Module block ────────────────────────────────────────────── */
+  .module { display: flex; flex-direction: column; gap: 2px; }
+  .module-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .module-header h2 {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .module-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .module-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  /* ── Endpoint row ────────────────────────────────────────────── */
+  .endpoint {
+    display: grid;
+    grid-template-columns: 62px 1fr auto;
+    align-items: start;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .endpoint:hover { border-color: var(--border-hi); }
+  .endpoint.expanded { border-color: var(--border-hi); }
+
+  /* method badge */
+  .method {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    padding: 14px 0;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .GET    { color: var(--get);    background: var(--get-bg); }
+  .POST   { color: var(--post);   background: var(--post-bg); }
+  .PATCH  { color: var(--patch);  background: var(--patch-bg); }
+  .DELETE { color: var(--delete); background: var(--delete-bg); }
+
+  /* path + summary */
+  .endpoint-main {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .path {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .78rem;
+    color: #e2eaf4;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+  .path .param { color: var(--patch); }
+  .summary {
+    font-size: .75rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  /* roles */
+  .roles {
+    padding: 12px 16px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .role-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .6rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .role-patient { background: var(--patient-bg); color: var(--patient); border: 1px solid rgba(129,140,248,.2); }
+  .role-doctor  { background: var(--doctor-bg);  color: var(--doctor);  border: 1px solid rgba(52,211,153,.2); }
+  .role-admin   { background: var(--admin-bg);   color: var(--admin);   border: 1px solid rgba(251,146,60,.2); }
+  .role-system  { background: rgba(167,139,250,.08); color: var(--system); border: 1px solid rgba(167,139,250,.2); }
+
+  /* ── Expanded detail panel ───────────────────────────────────── */
+  .detail {
+    display: none;
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--border);
+    padding: 20px 20px 20px 78px;
+    background: #0a0f14;
+  }
+  .endpoint.expanded .detail { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+  .detail-section h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  /* flow steps */
+  .flow-steps { display: flex; flex-direction: column; gap: 6px; }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: .75rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .step-n {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .6rem;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* guards / notes */
+  .pills { display: flex; flex-direction: column; gap: 6px; }
+  .pill {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: .74rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .pill-icon { flex-shrink: 0; opacity: .6; font-size: .8rem; margin-top: 1px; }
+
+  /* request/response body */
+  pre {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    color: #9bb8d0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    line-height: 1.6;
+    margin-top: 4px;
+  }
+  .k { color: #60a5fa; }  /* key */
+  .s { color: #86efac; }  /* string value */
+  .n { color: #fb923c; }  /* number/enum */
+  .b { color: #a78bfa; }  /* boolean */
+  .c { color: #4a6070; }  /* comment */
+
+  /* hidden by filter */
+  .endpoint.hidden { display: none; }
+
+  /* responsive */
+  @media (max-width: 700px) {
+    header, .filters, main { padding-left: 20px; padding-right: 20px; }
+    .endpoint { grid-template-columns: 56px 1fr; }
+    .roles { display: none; }
+    .endpoint.expanded .detail { grid-template-columns: 1fr; }
+    .detail { padding-left: 20px; }
+  }
+</style>
 </head>
 <body>
-    <h1>NestJS Auth Demo</h1>
 
-    <div class="section">
-        <h2>Register</h2>
-        <div class="form-group">
-            <label>Email:</label>
-            <input type="email" id="registerEmail" value="test@example.com">
-        </div>
-        <div class="form-group">
-            <label>Password:</label>
-            <input type="password" id="registerPassword" value="password123">
-        </div>
-        <div class="form-group">
-            <label>First Name:</label>
-            <input type="text" id="registerFirstName" value="John">
-        </div>
-        <div class="form-group">
-            <label>Last Name:</label>
-            <input type="text" id="registerLastName" value="Doe">
-        </div>
-        <button onclick="register()">Register</button>
+<header>
+  <div>
+    <h1>Pill<span>-</span>Sync <span style="color:var(--muted);font-weight:400">API</span></h1>
+    <p>NestJS · Mongoose · JWT · Click any endpoint to expand</p>
+  </div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted)">
+    <span><span style="color:var(--patient)">■</span> Patient</span>
+    <span><span style="color:var(--doctor)">■</span> Doctor</span>
+    <span><span style="color:var(--admin)">■</span> Admin</span>
+  </div>
+</header>
+
+<div class="filters">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn f-get"    data-filter="GET">GET</button>
+  <button class="filter-btn f-post"   data-filter="POST">POST</button>
+  <button class="filter-btn f-patch"  data-filter="PATCH">PATCH</button>
+  <button class="filter-btn f-delete" data-filter="DELETE">DELETE</button>
+  <span style="width:1px;background:var(--border);margin:0 4px;align-self:stretch"></span>
+  <button class="filter-btn f-patient" data-filter="patient">Patient</button>
+  <button class="filter-btn f-doctor"  data-filter="doctor">Doctor</button>
+  <button class="filter-btn f-admin"   data-filter="admin">Admin</button>
+</div>
+
+<main id="main"></main>
+
+<script>
+const modules = [
+  {
+    name: 'Auth',
+    color: '#3b82f6',
+    endpoints: [
+      {
+        method: 'POST', path: '/auth/register',
+        summary: 'Register a new patient or doctor account',
+        roles: ['patient','doctor'],
+        flow: [
+          'Validate email uniqueness in User collection',
+          'Hash password with bcrypt (12 rounds)',
+          'Create User document with role from body',
+          'Sign JWT with { sub, email, role }',
+          'Return accessToken + user summary',
+        ],
+        body: `{
+  <span class="k">"email"</span>:     <span class="s">"user@gmail.com"</span>,
+  <span class="k">"password"</span>:  <span class="s">"StrongPass123!"</span>,
+  <span class="k">"firstName"</span>: <span class="s">"John"</span>,
+  <span class="k">"lastName"</span>:  <span class="s">"Doe"</span>,
+  <span class="k">"role"</span>:      <span class="s">"patient"</span> <span class="c">// or "doctor"</span>
+}`,
+        response: `{
+  <span class="k">"accessToken"</span>: <span class="s">"eyJhbGci..."</span>,
+  <span class="k">"user"</span>: {
+    <span class="k">"email"</span>:                  <span class="s">"user@gmail.com"</span>,
+    <span class="k">"role"</span>:                   <span class="s">"patient"</span>,
+    <span class="k">"hasCompletedOnboarding"</span>: <span class="b">false</span>
+  }
+}`,
+      },
+      {
+        method: 'POST', path: '/auth/login',
+        summary: 'Login with email + password',
+        roles: ['patient','doctor','admin'],
+        flow: [
+          'Find user by email (select +password)',
+          'Verify isActive flag',
+          'bcrypt.compare() password',
+          'Sign and return JWT',
+        ],
+        body: `{
+  <span class="k">"email"</span>:    <span class="s">"user@gmail.com"</span>,
+  <span class="k">"password"</span>: <span class="s">"StrongPass123!"</span>
+}`,
+        response: `{
+  <span class="k">"accessToken"</span>: <span class="s">"eyJhbGci..."</span>,
+  <span class="k">"user"</span>: { <span class="c">/* same as register */</span> }
+}`,
+      },
+      {
+        method: 'GET', path: '/auth/google',
+        summary: 'Redirect to Google OAuth consent screen',
+        roles: ['patient','doctor'],
+        flow: [
+          'Passport redirects browser to Google',
+          'User authenticates with Google',
+          'Google redirects to /auth/google/callback',
+        ],
+        body: null,
+        response: `<span class="c">// 302 redirect to Google</span>`,
+      },
+      {
+        method: 'GET', path: '/auth/google/callback',
+        summary: 'Google OAuth callback — returns JWT',
+        roles: ['system'],
+        flow: [
+          'GoogleStrategy.validate() receives profile',
+          'Find user by googleId or email',
+          'Create new user OR link Google to existing local account',
+          'Return JWT same as login',
+        ],
+        body: null,
+        response: `{
+  <span class="k">"accessToken"</span>: <span class="s">"eyJhbGci..."</span>,
+  <span class="k">"user"</span>: { <span class="c">/* isEmailVerified: true */</span> }
+}`,
+      },
+    ],
+  },
+
+  {
+    name: 'Onboarding',
+    color: '#a78bfa',
+    endpoints: [
+      {
+        method: 'GET', path: '/onboarding/questions',
+        summary: 'Fetch all active questions in display order',
+        roles: ['patient'],
+        flow: [
+          'Query OnboardingQuestion where isActive = true',
+          'Sort by order ASC',
+          'Return with showIf conditions for client-side conditional rendering',
+        ],
+        body: null,
+        response: `[
+  {
+    <span class="k">"key"</span>:      <span class="s">"known_allergies"</span>,
+    <span class="k">"text"</span>:     <span class="s">"Do you have any known drug allergies?"</span>,
+    <span class="k">"type"</span>:     <span class="s">"multiple_choice"</span>,
+    <span class="k">"category"</span>: <span class="s">"allergies"</span>,
+    <span class="k">"choices"</span>:  [<span class="s">"Penicillin"</span>, <span class="s">"Aspirin"</span>, <span class="s">"Other"</span>],
+    <span class="k">"order"</span>:    <span class="n">1</span>,
+    <span class="k">"showIf"</span>:   <span class="b">null</span>
+  }
+]`,
+      },
+      {
+        method: 'POST', path: '/onboarding/submit',
+        summary: 'Patient submits all onboarding answers',
+        roles: ['patient'],
+        flow: [
+          'Validate all required question keys are answered',
+          'Bulk-upsert PatientAnswer documents (one per questionKey)',
+          'RiskScorerService scores each answer 0–100 based on category weight + keywords',
+          'AllergyExtractorService parses allergy-category answers → upserts PatientAllergy records',
+          'Fuzzy drug name resolution attempted for each allergy name',
+          'Set user.hasCompletedOnboarding = true',
+        ],
+        body: `{
+  <span class="k">"answers"</span>: [
+    { <span class="k">"questionKey"</span>: <span class="s">"known_allergies"</span>, <span class="k">"value"</span>: [<span class="s">"Penicillin"</span>] },
+    { <span class="k">"questionKey"</span>: <span class="s">"has_diabetes"</span>,     <span class="k">"value"</span>: <span class="b">true</span> },
+    { <span class="k">"questionKey"</span>: <span class="s">"age"</span>,             <span class="k">"value"</span>: <span class="n">34</span> }
+  ]
+}`,
+        response: `{ <span class="k">"message"</span>: <span class="s">"Onboarding completed successfully"</span> }`,
+      },
+      {
+        method: 'GET', path: '/onboarding/my-answers',
+        summary: 'Get current patient\'s submitted answers',
+        roles: ['patient'],
+        flow: [
+          'Read patientId from JWT',
+          'Query PatientAnswer by patientId',
+          'Return all answers with riskScore per answer',
+        ],
+        body: null,
+        response: `[
+  {
+    <span class="k">"questionKey"</span>:    <span class="s">"known_allergies"</span>,
+    <span class="k">"value"</span>:          [<span class="s">"Penicillin"</span>],
+    <span class="k">"normalizedValue"</span>: [<span class="s">"penicillin"</span>],
+    <span class="k">"riskScore"</span>:      <span class="n">80</span>
+  }
+]`,
+      },
+    ],
+  },
+
+  {
+    name: 'Patient Allergies',
+    color: '#f472b6',
+    endpoints: [
+      {
+        method: 'GET', path: '/allergies/my',
+        summary: '[Patient] List own active allergies',
+        roles: ['patient'],
+        flow: [
+          'Read patientId from JWT sub',
+          'Query PatientAllergy where patientId = me AND isActive = true',
+          'Populate drugRef with tradeName, genericName, form, route',
+          'Sort by severity then createdAt DESC',
+        ],
+        body: null,
+        response: `[
+  {
+    <span class="k">"name"</span>:              <span class="s">"penicillin"</span>,
+    <span class="k">"allergyType"</span>:      <span class="s">"drug"</span>,
+    <span class="k">"severity"</span>:         <span class="s">"severe"</span>,
+    <span class="k">"reaction"</span>:         <span class="s">"anaphylaxis"</span>,
+    <span class="k">"confirmedByDoctor"</span>: <span class="b">true</span>,
+    <span class="k">"drugRef"</span>: { <span class="k">"tradeName"</span>: <span class="s">"Amoxil"</span>, <span class="k">"genericName"</span>: <span class="s">"amoxicillin"</span> }
+  }
+]`,
+      },
+      {
+        method: 'POST', path: '/allergies/my',
+        summary: '[Patient] Self-report a new allergy',
+        roles: ['patient'],
+        flow: [
+          'Normalize name to lowercase + trim',
+          'Check for existing record with same patientId + name',
+          'If inactive record exists → re-activate instead of creating duplicate',
+          'Fuzzy-match name against Drug collection (tradeName / genericName / ingredients)',
+          'Create PatientAllergy with confirmedByDoctor = false',
+        ],
+        body: `{
+  <span class="k">"name"</span>:        <span class="s">"aspirin"</span>,
+  <span class="k">"severity"</span>:    <span class="s">"moderate"</span>,
+  <span class="k">"reaction"</span>:    <span class="s">"stomach bleeding"</span>
+}`,
+        response: `{
+  <span class="k">"_id"</span>:              <span class="s">"665f..."</span>,
+  <span class="k">"name"</span>:             <span class="s">"aspirin"</span>,
+  <span class="k">"allergyType"</span>:     <span class="s">"drug"</span>,
+  <span class="k">"confirmedByDoctor"</span>: <span class="b">false</span>,
+  <span class="k">"isActive"</span>:         <span class="b">true</span>
+}`,
+      },
+      {
+        method: 'GET', path: '/patients/<span class="param">:patientId</span>/allergies',
+        summary: '[Doctor] List a patient\'s allergies',
+        roles: ['doctor'],
+        flow: [
+          'RolesGuard verifies role = doctor',
+          'Query PatientAllergy by patientId param',
+          'Optional ?includeInactive=true to see history',
+        ],
+        body: null,
+        response: `<span class="c">// Same structure as /allergies/my</span>`,
+      },
+      {
+        method: 'POST', path: '/patients/<span class="param">:patientId</span>/allergies',
+        summary: '[Doctor] Add a confirmed allergy for a patient',
+        roles: ['doctor'],
+        flow: [
+          'Same create logic as patient self-report',
+          'confirmedByDoctor is hardcoded to true',
+          'Doctor can set allergyType explicitly (DRUG / INGREDIENT / DRUG_CLASS)',
+        ],
+        body: `{
+  <span class="k">"name"</span>:        <span class="s">"penicillin"</span>,
+  <span class="k">"allergyType"</span>: <span class="s">"drug_class"</span>,
+  <span class="k">"severity"</span>:    <span class="s">"severe"</span>,
+  <span class="k">"reaction"</span>:    <span class="s">"anaphylactic shock"</span>
+}`,
+        response: `{ <span class="c">/* PatientAllergy with confirmedByDoctor: true */</span> }`,
+      },
+      {
+        method: 'PATCH', path: '/patients/<span class="param">:patientId</span>/allergies/<span class="param">:allergyId</span>',
+        summary: '[Doctor] Update allergy severity, reaction or type',
+        roles: ['doctor'],
+        flow: [
+          'Find allergy by _id + patientId (404 if not found)',
+          'If name changed → re-run drug resolution',
+          'Update provided fields',
+          'Always sets confirmedByDoctor = true on any doctor write',
+        ],
+        body: `{
+  <span class="k">"severity"</span>: <span class="s">"severe"</span>,
+  <span class="k">"reaction"</span>: <span class="s">"throat swelling, hives"</span>
+}`,
+        response: `{ <span class="c">/* updated PatientAllergy document */</span> }`,
+      },
+      {
+        method: 'DELETE', path: '/patients/<span class="param">:patientId</span>/allergies/<span class="param">:allergyId</span>',
+        summary: '[Doctor] Soft-delete (deactivate) an allergy',
+        roles: ['doctor'],
+        flow: [
+          'Find allergy by _id + patientId',
+          'Throw 409 if already inactive',
+          'Set isActive = false — record is NEVER hard-deleted',
+          'Deactivated record excluded from safety checks but preserved for audit',
+        ],
+        body: null,
+        response: `{ <span class="k">"isActive"</span>: <span class="b">false</span>, <span class="c">/* full document */</span> }`,
+      },
+    ],
+  },
+
+  {
+    name: 'Patient Profile',
+    color: '#34d399',
+    endpoints: [
+      {
+        method: 'GET', path: '/patients/<span class="param">:patientId</span>/profile',
+        summary: '[Doctor] Full medical profile of a patient',
+        roles: ['doctor'],
+        flow: [
+          'Fetch User document for demographics',
+          'Parallel fetch: active allergies + all answers + active prescriptions',
+          'Compute overallRiskScore: top-3 answer scores weighted 2× + rest averaged',
+          'Derive riskLevel: low / medium / high / critical',
+          'Return unified profile object',
+        ],
+        body: null,
+        response: `{
+  <span class="k">"patient"</span>:             { <span class="k">"firstName"</span>: <span class="s">"John"</span>, <span class="k">"email"</span>: <span class="s">"..."</span> },
+  <span class="k">"overallRiskScore"</span>:    <span class="n">74</span>,
+  <span class="k">"riskLevel"</span>:           <span class="s">"high"</span>,
+  <span class="k">"allergies"</span>:           [<span class="c">/* PatientAllergy[] */</span>],
+  <span class="k">"medicalHistory"</span>:      [<span class="c">/* PatientAnswer[] */</span>],
+  <span class="k">"activePrescriptions"</span>: [<span class="c">/* Prescription[] */</span>]
+}`,
+      },
+    ],
+  },
+
+  {
+    name: 'Prescriptions',
+    color: '#fb923c',
+    endpoints: [
+      {
+        method: 'POST', path: '/prescriptions',
+        summary: '[Doctor] Create a draft prescription',
+        roles: ['doctor'],
+        flow: [
+          'Validate all drugIds are valid ObjectIds',
+          'Create Prescription with status = DRAFT',
+          'No safety check at this stage — doctor builds the list first',
+        ],
+        body: `{
+  <span class="k">"patientId"</span>: <span class="s">"665f..."</span>,
+  <span class="k">"items"</span>: [
+    {
+      <span class="k">"drugId"</span>:           <span class="s">"665f..."</span>,
+      <span class="k">"dosageInstruction"</span>: <span class="s">"500mg twice daily with food"</span>,
+      <span class="k">"durationDays"</span>:     <span class="n">7</span>,
+      <span class="k">"indication"</span>:       <span class="s">"bacterial infection"</span>
+    }
+  ],
+  <span class="k">"notes"</span>: <span class="s">"Patient presenting with URI"</span>
+}`,
+        response: `{ <span class="k">"status"</span>: <span class="s">"draft"</span>, <span class="k">"safetyCheckResult"</span>: <span class="b">null</span>, <span class="c">/* full Prescription */</span> }`,
+      },
+      {
+        method: 'PATCH', path: '/prescriptions/<span class="param">:id</span>/activate',
+        summary: '[Doctor] Run safety check → activate if clean',
+        roles: ['doctor'],
+        flow: [
+          'Assert prescription is DRAFT and belongs to this doctor',
+          'Collect drugIds from THIS prescription',
+          'Add drugIds from all other ACTIVE prescriptions of same patient',
+          'Run 3 parallel safety checks via SafetyCheckService:',
+          '  ① Allergy check — cross-reference each drug against PatientAllergy records',
+          '  ② Drug–Drug check — query every pair in DrugDrugInteraction',
+          '  ③ Drug–Disease check — query contraindications in DrugDiseaseInteraction',
+          'Store safetyCheckResult snapshot on prescription document',
+          'If passed → status = ACTIVE, return 200',
+          'If failed → status stays DRAFT, return 400 with full warnings',
+        ],
+        body: null,
+        response: `<span class="c">// ✅ Passed:</span>
+{ <span class="k">"status"</span>: <span class="s">"active"</span>, <span class="k">"safetyCheckResult"</span>: { <span class="k">"passed"</span>: <span class="b">true</span> } }
+
+<span class="c">// ⚠️ Failed (400):</span>
+{
+  <span class="k">"message"</span>: <span class="s">"Safety check failed"</span>,
+  <span class="k">"safetyCheckResult"</span>: {
+    <span class="k">"passed"</span>: <span class="b">false</span>,
+    <span class="k">"allergyWarnings"</span>:     [{ <span class="k">"drugName"</span>: <span class="s">"Amoxil"</span>, <span class="k">"allergyName"</span>: <span class="s">"penicillin"</span> }],
+    <span class="k">"drugDrugWarnings"</span>:    [{ <span class="k">"severity"</span>: <span class="s">"major"</span>, <span class="k">"description"</span>: <span class="s">"..."</span> }],
+    <span class="k">"drugDiseaseWarnings"</span>: []
+  }
+}`,
+      },
+      {
+        method: 'PATCH', path: '/prescriptions/<span class="param">:id</span>/override',
+        summary: '[Doctor] Override safety warnings and force-activate',
+        roles: ['doctor'],
+        flow: [
+          'Assert safetyCheckResult exists (activate must be called first)',
+          'Set status = ACTIVE',
+          'Set safetyOverride = true',
+          'Record safetyOverrideReason for audit trail',
+        ],
+        body: `{
+  <span class="k">"reason"</span>: <span class="s">"Patient stable on this combination for 2 years"</span>
+}`,
+        response: `{
+  <span class="k">"status"</span>:               <span class="s">"active"</span>,
+  <span class="k">"safetyOverride"</span>:      <span class="b">true</span>,
+  <span class="k">"safetyOverrideReason"</span>: <span class="s">"Patient stable on this combination for 2 years"</span>
+}`,
+      },
+      {
+        method: 'PATCH', path: '/prescriptions/<span class="param">:id</span>/cancel',
+        summary: '[Doctor] Cancel a prescription',
+        roles: ['doctor'],
+        flow: [
+          'Assert doctor owns the prescription',
+          'Throw 400 if already COMPLETED',
+          'Set status = CANCELLED',
+        ],
+        body: null,
+        response: `{ <span class="k">"status"</span>: <span class="s">"cancelled"</span> }`,
+      },
+      {
+        method: 'GET', path: '/prescriptions/my-prescriptions',
+        summary: '[Doctor] All prescriptions written by this doctor',
+        roles: ['doctor'],
+        flow: [
+          'Filter by doctorId from JWT',
+          'Populate items.drug and patientId',
+          'Sort by createdAt DESC',
+        ],
+        body: null,
+        response: `[{ <span class="c">/* Prescription[] with populated drug + patient */</span> }]`,
+      },
+      {
+        method: 'GET', path: '/prescriptions/my',
+        summary: '[Patient] View my prescriptions',
+        roles: ['patient'],
+        flow: [
+          'Filter by patientId from JWT',
+          'Populate items.drug',
+          'Sort by createdAt DESC',
+        ],
+        body: null,
+        response: `[{ <span class="c">/* Prescription[] with drug details */</span> }]`,
+      },
+      {
+        method: 'GET', path: '/prescriptions/<span class="param">:id</span>',
+        summary: 'Get a single prescription by ID',
+        roles: ['doctor','patient'],
+        flow: [
+          'Fetch by _id with items.drug populated',
+          'Returns safetyCheckResult and safetyOverrideReason if applicable',
+        ],
+        body: null,
+        response: `{ <span class="c">/* Full Prescription with safetyCheckResult snapshot */</span> }`,
+      },
+    ],
+  },
+
+  {
+    name: 'Drugs',
+    color: '#38bdf8',
+    endpoints: [
+      {
+        method: 'POST', path: '/drugs',
+        summary: '[Admin] Add a drug to the database',
+        roles: ['admin'],
+        flow: [
+          'Validate senomeCode uniqueness',
+          'Create Drug document',
+          'Throw 409 on duplicate senomeCode',
+        ],
+        body: `{
+  <span class="k">"senomeCode"</span>:      <span class="s">"AMX500"</span>,
+  <span class="k">"tradeName"</span>:       <span class="s">"Amoxil"</span>,
+  <span class="k">"genericName"</span>:     <span class="s">"amoxicillin"</span>,
+  <span class="k">"dose"</span>:            <span class="s">"500mg"</span>,
+  <span class="k">"form"</span>:            <span class="s">"capsule"</span>,
+  <span class="k">"route"</span>:           <span class="s">"oral"</span>,
+  <span class="k">"activeIngredients"</span>: [<span class="s">"amoxicillin"</span>]
+}`,
+        response: `{ <span class="c">/* Drug document */</span> }`,
+      },
+      {
+        method: 'GET', path: '/drugs',
+        summary: 'Search or list drugs',
+        roles: ['doctor','patient','admin'],
+        flow: [
+          '?search= → uses MongoDB $text index on tradeName + genericName + similarTradeNames',
+          '?form= / ?route= → field filters',
+          'No search param → return all sorted by tradeName ASC',
+        ],
+        body: null,
+        response: `[{ <span class="k">"tradeName"</span>: <span class="s">"Amoxil"</span>, <span class="k">"genericName"</span>: <span class="s">"amoxicillin"</span>, <span class="c">/* ... */</span> }]`,
+      },
+      {
+        method: 'GET', path: '/drugs/<span class="param">:id</span>',
+        summary: 'Get drug by ID',
+        roles: ['doctor','patient','admin'],
+        flow: ['Find by _id, throw 404 if not found'],
+        body: null,
+        response: `{ <span class="c">/* Full Drug document */</span> }`,
+      },
+      {
+        method: 'PATCH', path: '/drugs/<span class="param">:id</span>',
+        summary: '[Admin] Update drug details',
+        roles: ['admin'],
+        flow: ['findByIdAndUpdate with $set, return new document'],
+        body: `{ <span class="k">"similarTradeNames"</span>: [<span class="s">"Trimox"</span>, <span class="s">"Wymox"</span>] }`,
+        response: `{ <span class="c">/* updated Drug document */</span> }`,
+      },
+      {
+        method: 'DELETE', path: '/drugs/<span class="param">:id</span>',
+        summary: '[Admin] Remove a drug',
+        roles: ['admin'],
+        flow: ['findByIdAndDelete, throw 404 if not found'],
+        body: null,
+        response: `{ <span class="c">/* 200 OK */</span> }`,
+      },
+    ],
+  },
+
+  {
+    name: 'Interactions',
+    color: '#f87171',
+    endpoints: [
+      {
+        method: 'POST', path: '/interactions/drug-drug',
+        summary: '[Admin/Doctor] Add a drug–drug interaction',
+        roles: ['admin','doctor'],
+        flow: [
+          'Sort the two ObjectIds lexicographically → canonical drug_a / drug_b order',
+          'Create DrugDrugInteraction',
+          'Throw 409 if this pair already exists',
+        ],
+        body: `{
+  <span class="k">"drug_a"</span>:          <span class="s">"665f..."</span>,
+  <span class="k">"drug_b"</span>:          <span class="s">"665f..."</span>,
+  <span class="k">"severity"</span>:        <span class="s">"major"</span>,
+  <span class="k">"description"</span>:     <span class="s">"Risk of serotonin syndrome"</span>,
+  <span class="k">"mechanism"</span>:       <span class="s">"Both inhibit MAO"</span>,
+  <span class="k">"managementAdvice"</span>: <span class="s">"Avoid combination"</span>
+}`,
+        response: `{ <span class="c">/* DrugDrugInteraction document */</span> }`,
+      },
+      {
+        method: 'GET', path: '/interactions/drug-drug',
+        summary: 'List all drug–drug interactions',
+        roles: ['admin','doctor'],
+        flow: ['Find all, populate drug_a and drug_b'],
+        body: null,
+        response: `[{ <span class="k">"drug_a"</span>: {<span class="c">/* Drug */</span>}, <span class="k">"drug_b"</span>: {<span class="c">/* Drug */</span>}, <span class="k">"severity"</span>: <span class="s">"major"</span> }]`,
+      },
+      {
+        method: 'GET', path: '/interactions/drug-drug/drug/<span class="param">:drugId</span>',
+        summary: 'Get all interactions for a specific drug',
+        roles: ['admin','doctor'],
+        flow: ['Query where drug_a = id OR drug_b = id, populate both'],
+        body: null,
+        response: `[<span class="c">/* DrugDrugInteraction[] */</span>]`,
+      },
+      {
+        method: 'DELETE', path: '/interactions/drug-drug/<span class="param">:id</span>',
+        summary: '[Admin] Delete a drug–drug interaction',
+        roles: ['admin'],
+        flow: ['findByIdAndDelete'],
+        body: null,
+        response: `{ <span class="c">/* 200 OK */</span> }`,
+      },
+      {
+        method: 'POST', path: '/interactions/drug-disease',
+        summary: '[Admin/Doctor] Add a drug–disease interaction',
+        roles: ['admin','doctor'],
+        flow: [
+          'Create DrugDiseaseInteraction',
+          'Unique index on (drug, disease, relation) prevents duplicates',
+        ],
+        body: `{
+  <span class="k">"drug"</span>:        <span class="s">"665f..."</span>,
+  <span class="k">"disease"</span>:     <span class="s">"665f..."</span>,
+  <span class="k">"relation"</span>:    <span class="s">"Contraindication"</span>,
+  <span class="k">"severity"</span>:    <span class="s">"contraindicated"</span>,
+  <span class="k">"description"</span>: <span class="s">"NSAIDs contraindicated in peptic ulcer"</span>
+}`,
+        response: `{ <span class="c">/* DrugDiseaseInteraction document */</span> }`,
+      },
+      {
+        method: 'GET', path: '/interactions/drug-disease/drug/<span class="param">:drugId</span>',
+        summary: 'All contraindications / cautions for a drug',
+        roles: ['admin','doctor'],
+        flow: ['Query by drug field, populate disease'],
+        body: null,
+        response: `[<span class="c">/* DrugDiseaseInteraction[] with disease populated */</span>]`,
+      },
+      {
+        method: 'GET', path: '/interactions/drug-disease/disease/<span class="param">:diseaseId</span>',
+        summary: 'All drugs that interact with a disease',
+        roles: ['admin','doctor'],
+        flow: ['Query by disease field, populate drug'],
+        body: null,
+        response: `[<span class="c">/* DrugDiseaseInteraction[] with drug populated */</span>]`,
+      },
+      {
+        method: 'DELETE', path: '/interactions/drug-disease/<span class="param">:id</span>',
+        summary: '[Admin] Delete a drug–disease interaction',
+        roles: ['admin'],
+        flow: ['findByIdAndDelete'],
+        body: null,
+        response: `{ <span class="c">/* 200 OK */</span> }`,
+      },
+    ],
+  },
+];
+
+// ── Render ──────────────────────────────────────────────────────────────────
+
+function roleTags(roles) {
+  return roles.map(r => `<span class="role-tag role-${r}">${r}</span>`).join('');
+}
+
+function formatPath(path) {
+  return path.replace(/<span class="param">([^<]+)<\/span>/g,
+    (_, p) => `<span class="param">${p}</span>`);
+}
+
+function renderEndpoint(ep) {
+  const hasBody = ep.body !== null;
+  const dataRoles = ep.roles.join(' ');
+  const dataMethod = ep.method;
+
+  return `
+  <div class="endpoint" data-method="${dataMethod}" data-roles="${dataRoles}" onclick="toggle(this)">
+    <div class="method ${ep.method}">${ep.method}</div>
+    <div class="endpoint-main">
+      <div class="path">${formatPath(ep.path)}</div>
+      <div class="summary">${ep.summary}</div>
     </div>
-
-    <div class="section">
-        <h2>Login</h2>
-        <div class="form-group">
-            <label>Email:</label>
-            <input type="email" id="loginEmail" value="test@example.com">
+    <div class="roles">${roleTags(ep.roles)}</div>
+    <div class="detail">
+      <div class="detail-section">
+        <h4>Flow</h4>
+        <div class="flow-steps">
+          ${ep.flow.map((s, i) => `
+            <div class="flow-step">
+              <span class="step-n">${String(i+1).padStart(2,'0')}</span>
+              <span>${s}</span>
+            </div>`).join('')}
         </div>
-        <div class="form-group">
-            <label>Password:</label>
-            <input type="password" id="loginPassword" value="password123">
-        </div>
-        <button onclick="login()">Login</button>
-        <button class="google-btn" onclick="loginWithGoogle()">Login with Google</button>
+      </div>
+      <div class="detail-section">
+        ${hasBody ? `<h4>Request Body</h4><pre>${ep.body}</pre>` : ''}
+        <h4 style="margin-top:${hasBody?'16px':'0'}">Response</h4>
+        <pre>${ep.response}</pre>
+      </div>
     </div>
+  </div>`;
+}
 
-    <div class="section">
-        <h2>Get Profile (Protected)</h2>
-        <button onclick="getProfile()">Get Profile</button>
-        <button onclick="logout()">Logout</button>
-    </div>
+const main = document.getElementById('main');
+modules.forEach(mod => {
+  const html = `
+    <div class="module">
+      <div class="module-header">
+        <div class="module-dot" style="background:${mod.color}"></div>
+        <h2>${mod.name}</h2>
+      </div>
+      ${mod.endpoints.map(renderEndpoint).join('')}
+    </div>`;
+  main.insertAdjacentHTML('beforeend', html);
+});
 
-    <div class="output" id="output">Response will appear here...</div>
+// ── Toggle expand ───────────────────────────────────────────────────────────
 
-    <script>
-        const API_URL = 'http://localhost:3000';
-        
-        function showOutput(data) {
-            document.getElementById('output').textContent = JSON.stringify(data, null, 2);
-        }
+function toggle(el) {
+  el.classList.toggle('expanded');
+}
 
-        async function register() {
-            try {
-                const response = await fetch(`${API_URL}/auth/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: document.getElementById('registerEmail').value,
-                        password: document.getElementById('registerPassword').value,
-                        firstName: document.getElementById('registerFirstName').value,
-                        lastName: document.getElementById('registerLastName').value,
-                    }),
-                });
+// ── Filter logic ────────────────────────────────────────────────────────────
 
-                const data = await response.json();
-                
-                if (response.ok) {
-                    localStorage.setItem('token', data.access_token);
-                    showOutput({ success: true, ...data });
-                } else {
-                    showOutput({ error: data });
-                }
-            } catch (error) {
-                showOutput({ error: error.message });
-            }
-        }
+const btns = document.querySelectorAll('.filter-btn');
+let activeMethod = 'all';
+let activeRole   = null;
 
-        async function login() {
-            try {
-                const response = await fetch(`${API_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: document.getElementById('loginEmail').value,
-                        password: document.getElementById('loginPassword').value,
-                    }),
-                });
+btns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const f = btn.dataset.filter;
+    const methods = ['GET','POST','PATCH','DELETE'];
+    const roles   = ['patient','doctor','admin'];
 
-                const data = await response.json();
-                
-                if (response.ok) {
-                    localStorage.setItem('token', data.access_token);
-                    showOutput({ success: true, ...data });
-                } else {
-                    showOutput({ error: data });
-                }
-            } catch (error) {
-                showOutput({ error: error.message });
-            }
-        }
+    if (f === 'all') {
+      activeMethod = 'all'; activeRole = null;
+    } else if (methods.includes(f)) {
+      activeMethod = activeMethod === f ? 'all' : f;
+    } else if (roles.includes(f)) {
+      activeRole = activeRole === f ? null : f;
+    }
 
-        function loginWithGoogle() {
-            window.location.href = `${API_URL}/auth/google`;
-        }
+    // Update button states
+    btns.forEach(b => {
+      const bf = b.dataset.filter;
+      if (bf === 'all') {
+        b.classList.toggle('active', activeMethod === 'all' && !activeRole);
+      } else if (methods.includes(bf)) {
+        b.classList.toggle('active', activeMethod === bf);
+      } else {
+        b.classList.toggle('active', activeRole === bf);
+      }
+    });
 
-        async function getProfile() {
-            const token = localStorage.getItem('token');
-            
-            if (!token) {
-                showOutput({ error: 'No token found. Please login first.' });
-                return;
-            }
+    // Show/hide endpoints
+    document.querySelectorAll('.endpoint').forEach(ep => {
+      const mMatch = activeMethod === 'all' || ep.dataset.method === activeMethod;
+      const rMatch = !activeRole || ep.dataset.roles.includes(activeRole);
+      ep.classList.toggle('hidden', !(mMatch && rMatch));
+    });
 
-            try {
-                const response = await fetch(`${API_URL}/user/profile`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-
-                const data = await response.json();
-                showOutput(data);
-            } catch (error) {
-                showOutput({ error: error.message });
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('token');
-            showOutput({ message: 'Logged out successfully' });
-        }
-
-        // Handle Google OAuth callback
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('token');
-            
-            if (token) {
-                localStorage.setItem('token', token);
-                showOutput({ message: 'Google login successful!', token });
-                // Clean URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        };
-    </script>
+    // Hide empty module headers
+    document.querySelectorAll('.module').forEach(mod => {
+      const visible = [...mod.querySelectorAll('.endpoint')].some(e => !e.classList.contains('hidden'));
+      mod.style.display = visible ? '' : 'none';
+    });
+  });
+});
+</script>
 </body>
 </html>

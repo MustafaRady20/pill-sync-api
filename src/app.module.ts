@@ -1,25 +1,54 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserModule } from './users/users.module';
-import { DrugModule } from './drug/drug.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/users/users.module';
+import { DrugModule } from './modules/drug/drug.module';
+import { DiseaseModule } from './modules/diseases/diseases.module';
+import { InteractionsModule } from './modules/interactions/interactions.module';
+import { OnboardingModule } from './modules/onboarding/onboarding.module';
+import { PrescriptionsModule } from './modules/prescriptions/prescriptions.module';
+import { PatientProfileModule } from './modules/patient-profile/patient-profile.module';
+import { PatientAllergyModule } from './modules/patient-allergy/patient-allergy.module';
+import { NotificationsModule } from './infrastructure/notifications/notifications.module';
+import { EmailModule } from './infrastructure/email/email.module';
+import { DeviceTokensModule } from './infrastructure/device-tokens/device-tokens.module';
+import { QueueModule } from './infrastructure/queue/queue.module';
+import { RedisModule } from './infrastructure/redis/redis.module';
+import { CacheModule } from './common/cache/cache.module';
+import { PushModule } from './infrastructure/push/push.module';
+
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    // ── Config ────────────────────────────────────────────────────────────
+    ConfigModule.forRoot({ isGlobal: true }),
+
+    // ── Database ──────────────────────────────────────────────────────────
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.getOrThrow('DATABASE_HOST'),
-      }),
       inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('DATABASE_HOST'),
+      }),
     }),
+
+    // ── Feature Modules ───────────────────────────────────────────────────
     AuthModule,
     UserModule,
     DrugModule,
+    DiseaseModule,
+    InteractionsModule,
+    OnboardingModule,
+    PrescriptionsModule,
+    PatientProfileModule,
+    PatientAllergyModule,
+    QueueModule,
+    NotificationsModule,
+    EmailModule,
+    DeviceTokensModule,
+    PushModule,
+    RedisModule,
+    CacheModule,
   ],
 })
 export class AppModule {}

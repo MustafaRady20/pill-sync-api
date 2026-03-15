@@ -1,19 +1,4 @@
-version: "3.9"
-
 services:
-  postgres:
-    image: postgres:16
-    container_name: pillsync-postgres
-    restart: always
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - pillsync_pgdata:/var/lib/postgresql/data
-
   api:
     build:
       context: .
@@ -23,13 +8,46 @@ services:
     env_file:
       - .env
     ports:
-      - "3000:3000"
-    depends_on:
-      - postgres
+      - '3000:3000'
     volumes:
       - .:/app
       - /app/node_modules
     command: npm run start:dev
 
+  redis:
+    image: redis:7-alpine
+    container_name: notification-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - notification-net
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: notification-redis-ui
+    ports:
+      - '8082:8081'
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - notification-net
+
 volumes:
-  pillsync_pgdata:
+  redis-data:
+
+networks:
+  notification-net:
+    driver: bridge
