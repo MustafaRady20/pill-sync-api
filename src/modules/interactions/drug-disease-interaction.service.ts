@@ -6,7 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { DrugDiseaseInteraction, DrugDiseaseInteractionDocument, InteractionRelation, InteractionSeverity } from './schema/drug-disease-interaction.schema';
-import { CreateDrugDiseaseInteractionDto, UpdateDrugDiseaseInteractionDto } from './dto/drug-disease-interaction.dto';
+import { CreateDrugDiseaseInteractionDto, UpdateDrugDiseaseInteractionDto } from './dtos/drug-disease-interaction.dto';
 
 
 @Injectable()
@@ -69,10 +69,7 @@ export class DrugDiseaseService {
     return doc;
   }
 
-  /**
-   * All interactions (any relation) for a given drug.
-   * Useful for a drug detail page showing indications + contraindications together.
-   */
+
   async findForDrug(
     drugId: string,
     relation?: InteractionRelation,
@@ -87,10 +84,7 @@ export class DrugDiseaseService {
       .lean();
   }
 
-  /**
-   * All interactions for a given disease.
-   * Useful for a disease detail page showing which drugs treat vs. contraindicate.
-   */
+
   async findForDisease(
     diseaseId: string,
     relation?: InteractionRelation,
@@ -105,13 +99,7 @@ export class DrugDiseaseService {
       .lean();
   }
 
-  /**
-   * Core method used by SafetyCheckService.
-   *
-   * Given a list of drugIds and a list of the patient's diseaseIds,
-   * returns all CONTRAINDICATION and CAUTION interactions between them.
-   * Runs as a single DB query to keep prescription activation fast.
-   */
+
   async findContraindicationsForPatient(
     drugIds: string[],
     diseaseIds: string[],
@@ -150,7 +138,7 @@ export class DrugDiseaseService {
     id: string,
     dto: UpdateDrugDiseaseInteractionDto,
   ): Promise<DrugDiseaseInteractionDocument> {
-    // Strip immutable ref fields
+
     const { drug, disease, ...updateData } = dto;
 
     const doc = await this.model
@@ -162,7 +150,6 @@ export class DrugDiseaseService {
     return doc;
   }
 
-  // ─── Delete ───────────────────────────────────────────────────────────────
 
   async delete(id: string): Promise<void> {
     const result = await this.model.findByIdAndDelete(id);

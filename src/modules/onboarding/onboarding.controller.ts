@@ -19,11 +19,11 @@ export class OnboardingController {
     return this.onboardingService.getActiveQuestions();
   }
 
-  // @Post('submit')
-  // @ApiOperation({ summary: 'Patient submits their onboarding answers' })
-  // submitAnswers(@CurrentUser() user: UserDocument, @Body() dto: SubmitAnswersDto) {
-  //   return this.onboardingService.submitAnswers(user._id.toString(), dto);
-  // }
+  @Post('submit')
+  @ApiOperation({ summary: 'Patient submits their onboarding answers' })
+  submitAnswers(@CurrentUser() user: UserDocument, @Body() dto: SubmitAnswersDto) {
+    return this.onboardingService.submitAnswers(user._id.toString(), dto);
+  }
 
   @Get('my-answers')
   @ApiOperation({ summary: 'Get current patient onboarding answers' })

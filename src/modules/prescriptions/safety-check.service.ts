@@ -3,12 +3,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Drug, DrugDocument } from 'src/modules/drug/schemas/drug.schema';
 import { DrugDiseaseInteraction, DrugDiseaseInteractionDocument, InteractionRelation } from 'src/modules/interactions/schema/drug-disease-interaction.schema';
-import { DrugDrugInteraction, DrugDrugInteractionDocument, DrugInteractionSeverity } from 'src/modules/interactions/schema/drug-drug-interaction.schema';
+import { DrugDrugInteraction, DrugDrugInteractionDocument } from 'src/modules/interactions/schema/drug-drug-interaction.schema';
 import { PatientAllergy, PatientAllergyDocument } from 'src/modules/patient-allergy/schema/patient-allergy.schema';
+import { DrugInteractionSeverity } from '../interactions/enums/relations.enum';
 
 
 
-// ─── Result types ─────────────────────────────────────────────────────────────
 
 export interface AllergyWarning {
   drugId: string;
@@ -40,13 +40,12 @@ export interface DrugDiseaseWarning {
 
 export interface SafetyCheckResult {
   checkedAt: Date;
-  passed: boolean;                    // true only if ZERO warnings exist
+  passed: boolean;                    
   allergyWarnings: AllergyWarning[];
   drugDrugWarnings: DrugDrugWarning[];
   drugDiseaseWarnings: DrugDiseaseWarning[];
 }
 
-// ─── Service ──────────────────────────────────────────────────────────────────
 
 @Injectable()
 export class SafetyCheckService {
@@ -88,12 +87,7 @@ export class SafetyCheckService {
     };
   }
 
-  // ─── Check 1: Allergies ─────────────────────────────────────────────────
 
-  /**
-   * For each drug in the prescription, check if the patient has an active allergy
-   * to that drug's trade name, generic name, active ingredients, or drug class.
-   */
   private async checkAllergies(
     patientId: string,
     drugIds: Types.ObjectId[],

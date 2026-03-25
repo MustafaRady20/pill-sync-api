@@ -18,9 +18,9 @@ export class CreateDrugDto {
   @IsString()
   dose: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsString()
-  strength: string;
+  strength?: string;
 
   @ApiProperty()
   @IsString()

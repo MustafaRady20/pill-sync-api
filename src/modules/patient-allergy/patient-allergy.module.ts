@@ -22,7 +22,7 @@ import { Drug, DrugSchema } from 'src/modules/drug/schemas/drug.schema';
   providers: [PatientAllergyService],
   exports: [
     PatientAllergyService,
-    MongooseModule,   // important so other modules can access the model
+    MongooseModule,   
   ],
 })
 export class PatientAllergyModule {}

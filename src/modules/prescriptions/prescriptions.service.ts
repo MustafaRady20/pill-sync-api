@@ -35,16 +35,7 @@ export class PrescriptionsService {
     });
   }
 
-  // ─── Doctor: run safety check then activate ──────────────────────────────
 
-  /**
-   * Flow:
-   *   1. Load prescription (must be DRAFT and belong to this doctor)
-   *   2. Collect all drug IDs — from THIS prescription PLUS patient's other ACTIVE prescriptions
-   *   3. Run SafetyCheckService.runFullCheck()
-   *   4a. If passed → set status = ACTIVE, store result
-   *   4b. If failed → store result, throw 422 with warnings (doctor must explicitly override)
-   */
   async activate(
     doctorId: string,
     prescriptionId: string,
@@ -56,10 +47,8 @@ export class PrescriptionsService {
       throw new BadRequestException('Only DRAFT prescriptions can be activated');
     }
 
-    // Gather drug IDs from THIS prescription
     const newDrugIds = prescription.items.map((i) => i.drug.toString());
 
-    // Also include drugs from other ACTIVE prescriptions of the same patient
     const otherActivePrescriptions = await this.prescriptionModel.find({
       patientId: prescription.patientId,
       status: PrescriptionStatus.ACTIVE,
@@ -71,13 +60,11 @@ export class PrescriptionsService {
 
     const allDrugIds = [...new Set([...newDrugIds, ...existingDrugIds])];
 
-    // Run the full safety check
     const safetyResult = await this.safetyCheckService.runFullCheck(
       prescription.patientId.toString(),
       allDrugIds,
     );
 
-    // prescription.safetyCheckResult = safetyResult;
 
     if (safetyResult.passed) {
       prescription.status = PrescriptionStatus.ACTIVE;
@@ -87,7 +74,7 @@ export class PrescriptionsService {
     await prescription.save();
 
     if (!safetyResult.passed) {
-      // Return a 422 so the frontend can display warnings and prompt the doctor to override
+
       throw new BadRequestException({
         message: 'Safety check failed — review warnings before activating',
         safetyCheckResult: safetyResult,
@@ -97,7 +84,6 @@ export class PrescriptionsService {
     return prescription;
   }
 
-  // ─── Doctor: override safety warnings and force-activate ─────────────────
 
   async overrideAndActivate(
     doctorId: string,
@@ -119,7 +105,6 @@ export class PrescriptionsService {
     return prescription.save();
   }
 
-  // ─── Doctor: cancel ───────────────────────────────────────────────────────
 
   async cancel(doctorId: string, prescriptionId: string): Promise<PrescriptionDocument> {
     const prescription = await this.findOneOrFail(prescriptionId);
@@ -133,7 +118,6 @@ export class PrescriptionsService {
     return prescription.save();
   }
 
-  // ─── Queries ──────────────────────────────────────────────────────────────
 
   async getPatientPrescriptions(patientId: string): Promise<PrescriptionDocument[]> {
     return this.prescriptionModel
@@ -155,7 +139,6 @@ export class PrescriptionsService {
     return this.findOneOrFail(prescriptionId);
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
 
   private async findOneOrFail(id: string): Promise<PrescriptionDocument> {
     const doc = await this.prescriptionModel.findById(id).populate('items.drug');

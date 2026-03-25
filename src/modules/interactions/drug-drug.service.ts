@@ -7,7 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { DrugDrugInteraction, DrugDrugInteractionDocument } from './schema/drug-drug-interaction.schema';
-import { CreateDrugDrugInteractionDto, UpdateDrugDrugInteractionDto } from './dto/drug-drug-interaction.dto';
+import { CreateDrugDrugInteractionDto, UpdateDrugDrugInteractionDto } from './dtos/drug-drug-interaction.dto';
 
 @Injectable()
 export class DrugDrugService {
@@ -16,13 +16,7 @@ export class DrugDrugService {
     private model: Model<DrugDrugInteractionDocument>,
   ) {}
 
-  // ─── Create ───────────────────────────────────────────────────────────────
 
-  /**
-   * Canonically sorts the two drug ObjectIds (smaller first as drug_a)
-   * so the unique index fires correctly regardless of the input order.
-   * e.g. create(A,B) and create(B,A) both hit the same document.
-   */
   async create(dto: CreateDrugDrugInteractionDto): Promise<DrugDrugInteractionDocument> {
     if (dto.drug_a === dto.drug_b) {
       throw new BadRequestException('drug_a and drug_b must be different drugs');
@@ -50,7 +44,6 @@ export class DrugDrugService {
     }
   }
 
-  // ─── Read ─────────────────────────────────────────────────────────────────
 
   async findAll(): Promise<DrugDrugInteractionDocument[]> {
     return this.model
@@ -70,10 +63,6 @@ export class DrugDrugService {
     return doc;
   }
 
-  /**
-   * Returns all interactions where either drug_a OR drug_b matches the given drugId.
-   * Used by the doctor UI to show "all known interactions for this drug".
-   */
   async findForDrug(drugId: string): Promise<DrugDrugInteractionDocument[]> {
     const id = new Types.ObjectId(drugId);
     return this.model
@@ -84,11 +73,7 @@ export class DrugDrugService {
       .lean();
   }
 
-  /**
-   * Returns all interactions between a specific pair of drugs.
-   * Handles both orderings (A,B) and (B,A) by sorting before querying.
-   * Used directly by SafetyCheckService during prescription activation.
-   */
+ 
   async findForPair(
     drugIdA: string,
     drugIdB: string,
@@ -101,10 +86,7 @@ export class DrugDrugService {
       .lean();
   }
 
-  /**
-   * Batch version of findForPair — checks all unique pairs in a drug list.
-   * Used by SafetyCheckService to check an entire prescription at once.
-   */
+
   async findForDrugList(drugIds: string[]): Promise<DrugDrugInteractionDocument[]> {
     if (drugIds.length < 2) return [];
     const objectIds = drugIds.map((id) => new Types.ObjectId(id));
@@ -118,17 +100,12 @@ export class DrugDrugService {
       .lean();
   }
 
-  // ─── Update ───────────────────────────────────────────────────────────────
 
-  /**
-   * Only severity, description, mechanism, managementAdvice, and source
-   * can be updated. Drug pair cannot change — delete and recreate instead.
-   */
   async update(
     id: string,
     dto: UpdateDrugDrugInteractionDto,
   ): Promise<DrugDrugInteractionDocument> {
-    // Strip drug pair fields — they are immutable after creation
+
     const { drug_a, drug_b, ...updateData } = dto;
 
     const doc = await this.model.findByIdAndUpdate(
@@ -143,19 +120,13 @@ export class DrugDrugService {
     return doc;
   }
 
-  // ─── Delete ───────────────────────────────────────────────────────────────
 
   async delete(id: string): Promise<void> {
     const result = await this.model.findByIdAndDelete(id);
     if (!result) throw new NotFoundException('Drug–drug interaction not found');
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
 
-  /**
-   * Returns [smaller, larger] ObjectId pair so the unique compound index
-   * always sees the same order regardless of which way the pair was passed in.
-   */
   private sortPair(a: string, b: string): [Types.ObjectId, Types.ObjectId] {
     const oidA = new Types.ObjectId(a);
     const oidB = new Types.ObjectId(b);
