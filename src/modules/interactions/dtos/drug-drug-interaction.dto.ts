@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsEnum, IsMongoId, IsOptional, IsString, NotEquals } from 'class-validator';
-import { DrugInteractionSeverity } from '../schema/drug-drug-interaction.schema';
+import { DrugInteractionSeverity } from '../enums/relations.enum';
 
 export class CreateDrugDrugInteractionDto {
   @ApiProperty({ example: '665f1a2b3c4d5e6f7a8b9c0d' })

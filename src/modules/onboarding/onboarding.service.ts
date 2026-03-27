@@ -42,7 +42,6 @@ export class OnboardingService {
     const questions = await this.questionModel.find({ isActive: true }).lean();
     const questionMap = new Map(questions.map((q) => [q.key, q]));
 
-    // 1. Validate required questions
     const requiredKeys = questions.filter((q) => q.isRequired).map((q) => q.key);
     const answeredKeys = new Set(dto.answers.map((a) => a.questionKey));
     const missing = requiredKeys.filter((k) => !answeredKeys.has(k));
@@ -80,7 +79,7 @@ export class OnboardingService {
       return q?.category === OnboardingQuestionCategory.ALLERGIES;
     });
     if (allergyAnswers.length) {
-      // Normalize answer values to string | string[] expected by the allergy extractor
+
       const rawAllergyAnswers: any[] = allergyAnswers
         .map((a) => {
           if (Array.isArray(a.value)) {
