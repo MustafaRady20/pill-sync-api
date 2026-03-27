@@ -60,12 +60,7 @@ export class SafetyCheckService {
     private drugModel: Model<DrugDocument>,
   ) {}
 
-  /**
-   * Master safety check — runs all three checks and returns a unified result.
-   *
-   * @param patientId   patient being prescribed to
-   * @param drugIds     drugs in the NEW prescription being written
-   */
+  
   async runFullCheck(patientId: string, drugIds: string[]): Promise<SafetyCheckResult> {
     const objectIds = drugIds.map((id) => new Types.ObjectId(id));
 
@@ -104,7 +99,7 @@ export class SafetyCheckService {
     const warnings: AllergyWarning[] = [];
 
     for (const drug of drugs) {
-      // Build a set of all names/ingredients associated with this drug
+
       const drugNames = new Set([
         drug.tradeName.toLowerCase(),
         drug.genericName.toLowerCase(),
@@ -128,19 +123,11 @@ export class SafetyCheckService {
     return warnings;
   }
 
-  // ─── Check 2: Drug–Drug Interactions ───────────────────────────────────
-
-  /**
-   * For every unique pair of drugs in the prescription (including drugs from
-   * OTHER ACTIVE prescriptions of the same patient), check for known interactions.
-   */
   private async checkDrugDrugInteractions(
     drugIds: Types.ObjectId[],
   ): Promise<DrugDrugWarning[]> {
     if (drugIds.length < 2) return [];
 
-    // Query interactions where BOTH drugs in a pair are present in our list
-    // The schema guarantees smaller ObjectId is always drug_a
     const interactions = await this.ddiModel
       .find({
         drug_a: { $in: drugIds },
@@ -160,21 +147,12 @@ export class SafetyCheckService {
     }));
   }
 
-  // ─── Check 3: Drug–Disease (contraindications) ──────────────────────────
 
-  /**
-   * Cross-references the prescription drugs against the patient's confirmed
-   * diseases (sourced from onboarding + doctor updates) looking for
-   * contraindications and high-severity cautions.
-   */
   private async checkDrugDiseaseInteractions(
     patientId: string,
     drugIds: Types.ObjectId[],
   ): Promise<DrugDiseaseWarning[]> {
-    // Get patient's disease IDs from their allergy/answer records
-    // In a real app, you'd have a separate PatientDisease collection —
-    // here we query DrugDiseaseInteraction filtering by the patient's diseases
-    // This requires a PatientDisease model; shown as placeholder
+
     const patientDiseaseIds: Types.ObjectId[] = await this.getPatientDiseaseIds(patientId);
     if (!patientDiseaseIds.length) return [];
 
@@ -200,11 +178,7 @@ export class SafetyCheckService {
     }));
   }
 
-  /**
-   * Placeholder — replace with a real PatientDisease model query.
-   * In the full app, diseases come from onboarding answers tagged
-   * with the CHRONIC_DISEASES category.
-   */
+
   private async getPatientDiseaseIds(_patientId: string): Promise<Types.ObjectId[]> {
     // TODO: inject PatientDisease model and query here
     return [];
