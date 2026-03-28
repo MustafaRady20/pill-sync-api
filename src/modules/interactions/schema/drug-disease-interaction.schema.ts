@@ -4,13 +4,14 @@ import { Document, Types } from 'mongoose';
 export type DrugDiseaseInteractionDocument = DrugDiseaseInteraction & Document;
 
 export enum InteractionRelation {
-  INDICATION = 'Indication',         // drug is used TO TREAT the disease
-  SIDE_EFFECT = 'Side-Effect',       // drug may CAUSE the disease/condition
-  CONTRAINDICATION = 'Contraindication', // drug is FORBIDDEN in presence of disease
-  CAUTION = 'Caution',                   // drug requires extra monitoring
+  INDICATION = 'Indication',         
+  SIDE_EFFECT = 'Side-Effect',      
+  CONTRAINDICATION = 'Contraindication', 
+  CAUTION = 'Caution',                   
   SAFE = 'Safe',               
 }
 
+// TODO
 // لم يتم العثور على تفاعلات بينهم 
 
 export enum InteractionSeverity {
@@ -37,21 +38,13 @@ export class DrugDiseaseInteraction {
   @Prop({ type: String })
   description?: string;
 
-  /**
-   * For Indication: recommended dose range when treating this disease
-   */
   @Prop({ type: String })
   recommendedDose?: string;
 
-  /**
-   * Clinical reasoning behind the interaction
-   */
+
   @Prop({ type: String })
   reasoning?: string;
 
-  /**
-   * Source reference (e.g. "FDA label", "WHO guidelines")
-   */
   @Prop({ type: String })
   source?: string;
 

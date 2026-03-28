@@ -29,22 +29,7 @@ export class PatientAllergyService {
     private drugModel: Model<DrugDocument>,
   ) {}
 
-  // ─── Create ───────────────────────────────────────────────────────────────
 
-  /**
-   * Creates a new PatientAllergy record.
-   *
-   * Logic:
-   *  1. Normalize name to lowercase + trim
-   *  2. Check if record already exists for this patient + name:
-   *     - Active  → throw 409
-   *     - Inactive → re-activate with new values (preserves history)
-   *  3. Fuzzy-resolve name against Drug collection
-   *  4. Insert with allergyType auto-detected if not provided
-   *
-   * @param confirmedByDoctor  true when called from DoctorAllergyController,
-   *                           false when called from MyAllergyController (self-report)
-   */
   async create(
     patientId: string,
     dto: CreateAllergyDto,
@@ -63,13 +48,13 @@ export class PatientAllergyService {
           `An active allergy for "${normalized}" is already recorded for this patient`,
         );
       }
-      // Re-activate deactivated record — avoids duplicate, preserves createdAt history
+
       existing.isActive = true;
       existing.severity = dto.severity ?? AllergySeverity.UNKNOWN;
       existing.reaction = dto.reaction;
       existing.allergyType = dto.allergyType ?? existing.allergyType;
       existing.confirmedByDoctor = confirmedByDoctor;
-      // Re-run drug resolution in case DB was updated since deactivation
+
       const drug = await this.resolveDrug(normalized);
       existing.drugRef = drug?._id ?? existing.drugRef;
       return existing.save();
@@ -92,8 +77,6 @@ export class PatientAllergyService {
       isActive: true,
     });
   }
-
-  // ─── Read ─────────────────────────────────────────────────────────────────
 
   async findAllForPatient(
     patientId: string,
@@ -126,16 +109,7 @@ export class PatientAllergyService {
     return allergy;
   }
 
-  // ─── Update ───────────────────────────────────────────────────────────────
 
-  /**
-   * Updates an allergy record. Any update by a doctor auto-sets confirmedByDoctor = true.
-   *
-   * If name changes:
-   *  - Guard against collision with another active record for the same name
-   *  - Re-run drug resolution for the new name
-   *  - Update allergyType unless explicitly overridden in dto
-   */
   async update(
     patientId: string,
     allergyId: string,
@@ -146,7 +120,7 @@ export class PatientAllergyService {
     const newName = dto.name?.toLowerCase().trim();
 
     if (newName && newName !== allergy.name) {
-      // Guard: ensure new name doesn't collide with another active record
+
       const collision = await this.allergyModel.findOne({
         patientId: new Types.ObjectId(patientId),
         name: newName,
@@ -175,15 +149,7 @@ export class PatientAllergyService {
     return allergy.save();
   }
 
-  // ─── Deactivate ───────────────────────────────────────────────────────────
 
-  /**
-   * Soft-delete: sets isActive = false.
-   *
-   * Hard-delete is intentionally NOT exposed — allergy history must be
-   * preserved for audit trails and retrospective safety analysis.
-   * A deactivated record can be re-activated via create() with the same name.
-   */
   async deactivate(
     patientId: string,
     allergyId: string,
@@ -198,20 +164,7 @@ export class PatientAllergyService {
     return allergy.save();
   }
 
-  // ─── Safety check helper ──────────────────────────────────────────────────
 
-  /**
-   * Lightweight method called by SafetyCheckService during prescription activation.
-   *
-   * Returns the minimal fields needed for the allergy check:
-   *   - name             → matched against drug trade/generic/ingredient names
-   *   - drugRefId        → matched directly against Drug._id for exact hits
-   *   - allergyType      → DRUG_CLASS entries can trigger class-wide matching
-   *   - severity         → included in warning payload for doctor review
-   *   - confirmedByDoctor → used to weight severity in SafetyCheckService
-   *
-   * No population — raw ObjectIds only, keeping this query as fast as possible.
-   */
   async getActiveAllergyIndex(patientId: string): Promise<AllergyIndexEntry[]> {
     const allergies = await this.allergyModel
       .find({ patientId: new Types.ObjectId(patientId), isActive: true })
@@ -228,20 +181,7 @@ export class PatientAllergyService {
     }));
   }
 
-  // ─── Private helpers ──────────────────────────────────────────────────────
 
-  /**
-   * Fuzzy-matches a normalized allergy name against the Drug collection.
-   *
-   * Match priority (most → least specific):
-   *   1. genericName  exact match  (case-insensitive)
-   *   2. tradeName    exact match
-   *   3. similarTradeNames  array member exact match
-   *   4. activeIngredients  array member exact match
-   *
-   * Anchored regex (^name$) prevents partial matches like "cillin" matching "amoxicillin".
-   * Returns null if not found — does NOT block saving the allergy.
-   */
   private async resolveDrug(name: string): Promise<DrugDocument | null> {
     const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     return this.drugModel.findOne({

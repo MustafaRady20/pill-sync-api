@@ -11,10 +11,6 @@ export enum OnboardingQuestionType {
   BOOLEAN = 'boolean',
 }
 
-/**
- * Which category of medical information this question targets.
- * Used to route answers to the right risk-scoring module.
- */
 export enum OnboardingQuestionCategory {
   DEMOGRAPHICS = 'demographics',
   CHRONIC_DISEASES = 'chronic_diseases',
@@ -28,18 +24,12 @@ export enum OnboardingQuestionCategory {
 
 @Schema({ timestamps: true })
 export class OnboardingQuestion {
-  /**
-   * Stable machine-readable key used to look up answers later (e.g. "has_diabetes", "known_allergies")
-   */
   @Prop({ required: true, unique: true, trim: true })
   key: string;
 
   @Prop({ required: true })
   text: string;
 
-  /**
-   * Optional subtitle / hint shown below the main question
-   */
   @Prop()
   hint?: string;
 
@@ -49,9 +39,6 @@ export class OnboardingQuestion {
   @Prop({ enum: OnboardingQuestionCategory, default: OnboardingQuestionCategory.OTHER })
   category: OnboardingQuestionCategory;
 
-  /**
-   * Only populated for SINGLE_CHOICE and MULTIPLE_CHOICE types
-   */
   @Prop({ type: [String], default: [] })
   choices: string[];
 
@@ -64,9 +51,6 @@ export class OnboardingQuestion {
   @Prop({ default: false })
   isRequired: boolean;
 
-  /**
-   * Validation constraints for NUMBER and TEXT types
-   */
   @Prop({
     type: {
       min: { type: Number, default: null },
@@ -81,10 +65,7 @@ export class OnboardingQuestion {
     regex?: string;
   };
 
-  /**
-   * If set, this question is only shown when another question has a specific answer.
-   * e.g. { questionKey: "has_allergies", expectedValue: true }
-   */
+
   @Prop({
     type: {
       questionKey: String,

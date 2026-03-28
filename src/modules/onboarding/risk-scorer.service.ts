@@ -1,17 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { OnboardingQuestion, OnboardingQuestionCategory } from './schema/onboarding-question.schema';
 
-/**
- * Assigns a 0–100 risk score to a single answer based on:
- *   - Question category weight
- *   - The actual answer value
- *
- * These scores are later aggregated on the patient profile
- * to flag high-risk patients to doctors.
- */
+
 @Injectable()
 export class RiskScorerService {
-  /** Category base weights (0–100) */
+
   private readonly CATEGORY_WEIGHTS: Record<string, number> = {
     [OnboardingQuestionCategory.ALLERGIES]: 80,
     [OnboardingQuestionCategory.CHRONIC_DISEASES]: 70,
@@ -23,10 +16,6 @@ export class RiskScorerService {
     [OnboardingQuestionCategory.OTHER]: 5,
   };
 
-  /**
-   * High-risk keyword list — presence of any of these in the answer
-   * multiplies the score by 1.5 (capped at 100)
-   */
   private readonly HIGH_RISK_KEYWORDS = [
     'anaphylaxis', 'anaphylactic',
     'heart failure', 'renal failure', 'kidney failure', 'liver failure',
@@ -36,7 +25,7 @@ export class RiskScorerService {
   ];
 
   score(question: OnboardingQuestion, value: unknown): number {
-    // Boolean false / empty / zero → no risk contribution
+
     if (value === false || value === null || value === '' || value === 0) return 0;
 
     const base = this.CATEGORY_WEIGHTS[question.category] ?? 5;

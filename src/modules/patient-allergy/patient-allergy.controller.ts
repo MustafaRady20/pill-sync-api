@@ -25,11 +25,6 @@ import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator'
 import type { UserDocument } from 'src/modules/users/schemas/user.schema';
 import { CreateAllergyDto } from './dto/create-allergy.dto';
 import { UpdateAllergyDto } from './dto/update-allergy.dto';
-// ─────────────────────────────────────────────────────────────────────────────
-// Patient controller  —  /allergies/my
-// Patient can only read and self-report their OWN allergies.
-// confirmedByDoctor is always false from this controller.
-// ─────────────────────────────────────────────────────────────────────────────
 
 @ApiTags('Allergies — Patient (self)')
 @ApiBearerAuth()
@@ -82,11 +77,6 @@ export class MyAllergyController {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Doctor controller  —  /patients/:patientId/allergies
-// Doctor can read, add, update, and soft-delete allergies for ANY patient.
-// confirmedByDoctor is always true from this controller.
-// ─────────────────────────────────────────────────────────────────────────────
 
 @ApiTags('Allergies — Doctor (patient management)')
 @ApiBearerAuth()

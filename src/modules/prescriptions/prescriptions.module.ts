@@ -34,12 +34,12 @@ import {
         schema: DrugDiseaseInteractionSchema,
       },
     ]),
-    InteractionsModule, // DrugDrugService + DrugDiseaseService
-    PatientAllergyModule, // PatientAllergyService.getActiveAllergyIndex()
-    DrugModule, // Drug model for populating prescription items
+    InteractionsModule, 
+    PatientAllergyModule, 
+    DrugModule, 
   ],
   controllers: [PrescriptionsController],
   providers: [PrescriptionsService, SafetyCheckService],
-  exports: [PrescriptionsService], // exported so PatientProfileModule can read active Rxs
+  exports: [PrescriptionsService],
 })
 export class PrescriptionsModule {}

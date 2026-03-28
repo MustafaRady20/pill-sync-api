@@ -21,11 +21,11 @@ import { DrugDrugService } from './drug-drug.service';
 import {
   CreateDrugDrugInteractionDto,
   UpdateDrugDrugInteractionDto,
-} from './dto/drug-drug-interaction.dto';
+} from './dtos/drug-drug-interaction.dto';
 import {
   CreateDrugDiseaseInteractionDto,
   UpdateDrugDiseaseInteractionDto,
-} from './dto/drug-disease-interaction.dto';
+} from './dtos/drug-disease-interaction.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.auth.guard';
 import { RolesGuard } from 'src/modules/auth/guards/role.guard';
 import { UserRole } from 'src/modules/users/schemas/user.schema';
@@ -34,9 +34,7 @@ import { DrugDiseaseService } from './drug-disease-interaction.service';
 import { InteractionRelation, InteractionSeverity } from './schema/drug-disease-interaction.schema';
 
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Drug–Drug Interactions
-// ─────────────────────────────────────────────────────────────────────────────
 
 @ApiTags('Interactions — Drug / Drug')
 @ApiBearerAuth()
@@ -110,9 +108,7 @@ export class DrugDrugController {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Drug–Disease Interactions
-// ─────────────────────────────────────────────────────────────────────────────
 
 @ApiTags('Interactions — Drug / Disease')
 @ApiBearerAuth()

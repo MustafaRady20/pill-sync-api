@@ -32,7 +32,7 @@ export class NotificationsService {
         attempts: 5,
         backoff: { type: 'exponential', delay: 5000 },
         removeOnComplete: true,
-        removeOnFail: 100, // keep last 100 failed jobs for debugging
+        removeOnFail: 100, 
       },
     );
 

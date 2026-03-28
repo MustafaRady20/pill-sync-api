@@ -39,17 +39,12 @@ export class Drug {
   @Prop({ type: String, required: true, index: true, trim: true })
   genericName: string;
 
-  /**
-   * Dose per unit, e.g. "500mg", "10mg/5ml"
-   */
+  
   @Prop({ type: String, required: true })
   dose: string;
 
-  /**
-   * Concentration/strength descriptor, e.g. "500mg/5ml", "high", "low"
-   */
-  @Prop({ type: String, required: true })
-  strength: string;
+  @Prop({ type: String, required: false })
+  strength?: string;
 
   @Prop({ type: String, required: true, enum: DrugForm })
   form: DrugForm;
@@ -63,21 +58,14 @@ export class Drug {
   @Prop({ type: String })
   description?: string;
 
-  /**
-   * Other brand names for the same compound (for fuzzy lookup / duplicate prevention)
-   */
+ 
   @Prop({ type: [String], default: [], index: true })
   similarTradeNames: string[];
 
-  /**
-   * Active ingredient IDs — helps detect allergy conflicts across different brand names
-   */
   @Prop({ type: [String], default: [] })
   activeIngredients: string[];
 
-  /**
-   * ATC code for pharmacological classification (useful for interaction grouping)
-   */
+
   @Prop({ type: String })
   atcCode?: string;
 }
