@@ -17,14 +17,17 @@ import { QueueModule } from './infrastructure/queue/queue.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { CacheModule } from './common/cache/cache.module';
 import { PushModule } from './infrastructure/push/push.module';
+import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { ComplaintsModule } from './modules/complaints/complaints.module';
+import { FileUploadModule } from './infrastructure/file-upload/file-upload.module';
+import { NotesModule } from './modules/notes/notes.module';
+import { VitalSignsModule } from './modules/vital-sign/vital-sign.module';
 
 
 @Module({
   imports: [
-    // ── Config ────────────────────────────────────────────────────────────
     ConfigModule.forRoot({ isGlobal: true }),
 
-    // ── Database ──────────────────────────────────────────────────────────
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -32,7 +35,6 @@ import { PushModule } from './infrastructure/push/push.module';
       }),
     }),
 
-    // ── Feature Modules ───────────────────────────────────────────────────
     AuthModule,
     UserModule,
     DrugModule,
@@ -49,6 +51,11 @@ import { PushModule } from './infrastructure/push/push.module';
     PushModule,
     RedisModule,
     CacheModule,
+    AppointmentsModule,
+    ComplaintsModule,
+    VitalSignsModule,
+    FileUploadModule,
+    NotesModule,
   ],
 })
 export class AppModule {}
