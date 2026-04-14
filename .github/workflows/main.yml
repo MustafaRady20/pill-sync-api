@@ -1,0 +1,57 @@
+name: Deploy production
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: pillsync-production   
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2 (production)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}        
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH }}      
+          script: |
+            set -e
+
+            cd /home/ubuntu/pill-sunc/production
+
+            echo "🚀 Starting production Deployment..."
+
+            # Backup .env
+            if [ -f ".env" ]; then
+              cp .env /tmp/.env.production.backup
+            fi
+
+            if [ ! -d ".git" ]; then
+              git init
+              git remote add origin git@github.com:${{ github.repository }}.git
+            fi
+
+            git remote set-url origin git@github.com:${{ github.repository }}.git
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Restore .env
+            if [ -f "/tmp/.env.production.backup" ]; then
+              mv /tmp/.env.production.backup .env
+            fi
+
+            echo "📦 Rebuilding containers..."
+
+            docker compose down
+            docker compose pull
+            docker compose up -d --build --remove-orphans
+
+            docker image prune -f
+            
+
+            echo "✅ production Deployment Complete!"
