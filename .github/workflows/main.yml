@@ -22,7 +22,7 @@ jobs:
           script: |
             set -e
 
-            cd /home/ubuntu/pill-sunc/production
+            cd /home/ubuntu/pill-sync/production
 
             echo "🚀 Starting production Deployment..."
 
