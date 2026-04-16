@@ -13,7 +13,7 @@ import { FileUploadService } from "./file-upload.service";
 
 const multerOptions = {
   storage: memoryStorage(),
-  limits: { fileSize: 500 * 1024 * 1024 }, // 500 MB — service validates per type
+  limits: { fileSize: 500 * 1024 * 1024 }, 
 };
 
 @ApiTags("File Upload")
@@ -21,7 +21,6 @@ const multerOptions = {
 export class FileUploadController {
   constructor(private readonly fileUploadService: FileUploadService) {}
 
-  // ─── Upload single file ────────────────────────────────────────────────────
 
   @Post("upload")
   @UseInterceptors(FileInterceptor("file", multerOptions))
@@ -69,7 +68,6 @@ export class FileUploadController {
     return { urls };
   }
 
-  // ─── Presigned URL (client uploads directly to S3) ─────────────────────────
 
   @Get("presigned-url")
   @ApiOperation({ summary: "Get a presigned URL for direct S3 upload (for very large files)" })
@@ -85,7 +83,6 @@ export class FileUploadController {
     return this.fileUploadService.getPresignedUploadUrl(filename, mimetype, folder);
   }
 
-  // ─── Delete ────────────────────────────────────────────────────────────────
 
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
