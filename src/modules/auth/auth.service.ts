@@ -31,11 +31,11 @@ export class AuthService {
   }
 
   async validateUser(
-    email: string,
+    identifier: string,
     password: string,
   ): Promise<UserDocument | null> {
-    const user = await this.usersService.findByEmail(email);
-    console.log('Validating user:', email, 'Found user:', !!user);
+    const user = await this.usersService.findByIdentifier(identifier);
+    console.log('Validating user:', identifier, 'Found user:', !!user);
     if (!user || !user.password) return null;
     const isMatch = await bcrypt.compare(password, user.password);
     return isMatch ? user : null;
@@ -99,15 +99,22 @@ export class AuthService {
   }
 
 
-  async login(dto: LoginDto) {
-    console.log('Logging in user:', dto.email);
-    const user = await this.validateUser(dto.email, dto.password);
-    if (!user) throw new UnauthorizedException();
+async login(dto: LoginDto) {
+  const user = await this.validateUser(dto.identifier, dto.password);
+  if (!user) throw new UnauthorizedException();
+ 
+  const tokens = await this.generateTokens(user);
+  await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
 
-    const tokens = await this.generateTokens(user);
-    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
-    return { user: user.toJSON(), ...tokens };
-  }
+  const profile = await this.usersService.getProfile(user._id.toString());
+
+  return {
+    user: user.toJSON(),
+    ...tokens,
+    onboardingStep: profile?.onboardingStep ?? 0,
+    hasCompletedOnboarding: user.hasCompletedOnboarding,
+  };
+}
 
   async googleAuth(idToken: string) {
     const ticket = await this.googleClient

@@ -13,7 +13,7 @@ services:
       - '3000:3000'
     volumes:
       - .:/app
-    command: npm run start:dev
+    command: npm run start
     depends_on:
       redis:
         condition: service_healthy
@@ -56,8 +56,23 @@ services:
     networks:
       - notification-net
 
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - notification-net
+
 volumes:
   redis-data:
+  mongo_data:
 
 networks:
   notification-net:

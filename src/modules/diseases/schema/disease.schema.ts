@@ -5,23 +5,31 @@ export type DiseaseDocument = Disease & Document;
 
 @Schema({ timestamps: true })
 export class Disease {
-
-  @Prop({ type: String, sparse: true, uppercase: true, trim: true })
+  @Prop({ unique: true, sparse: true, uppercase: true, trim: true })
   diseaseCode?: string;
 
-  @Prop({ type: String, required: true, index: true, trim: true })
+  @Prop({ required: true, trim: true })
   name: string;
 
   @Prop({ type: [String], default: [] })
   similarNames: string[];
 
+  @Prop({ type:String, })
+  familyCode: string;
 
-  @Prop({ type: String })
-  category?: string;
+  @Prop({ type:String, })
+  family: string;
 
-  @Prop({ type: String })
-  description?: string;
+  @Prop({type:String,  })
+  parentCode?: string;
+
+  @Prop({type:Number })
+  level: number;
 }
 
 export const DiseaseSchema = SchemaFactory.createForClass(Disease);
-DiseaseSchema.index({ name: 'text', similarNames: 'text' }); 
+
+DiseaseSchema.index(
+  { name: 'text', similarNames: 'text' },
+  { weights: { name: 5, similarNames: 3 } },
+);

@@ -22,20 +22,16 @@ export class User {
   @Prop({ required: true, unique: true, index: true, lowercase: true, trim: true })
   email: string;
 
+  @ApiProperty({ example: '+1234567890', required: false })
+  @Prop({ unique: true, index: true, sparse: true, trim: true })
+  phoneNumber?: string;
+
   @Prop({ select: false }) 
   password?: string;
 
   @ApiProperty({ enum: UserRole, default: UserRole.PATIENT })
   @Prop({ type: String, enum: UserRole, default: UserRole.PATIENT, index: true })
   role: UserRole;
-
-  @ApiProperty({ example: 'John', required: false })
-  @Prop({ trim: true })
-  firstName?: string;
-
-  @ApiProperty({ example: 'Doe', required: false })
-  @Prop({ trim: true })
-  lastName?: string;
 
   @ApiProperty({ example: 'google-oauth-id', required: false })
   @Prop({ index: true, sparse: true }) // sparse so null values don't conflict on unique

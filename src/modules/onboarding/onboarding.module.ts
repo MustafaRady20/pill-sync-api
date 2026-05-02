@@ -10,8 +10,6 @@ import { OnboardingQuestion, OnboardingQuestionSchema } from './schema/onboardin
 import { PatientAnswer, PatientAnswerSchema } from 'src/modules/patient-profile/schema/patient-answers.schema';
 import { User, UserSchema } from 'src/modules/users/schemas/user.schema';
 import { DrugModule } from 'src/modules/drug/drug.module';
-import { PatientAllergyModule } from 'src/modules/patient-allergy/patient-allergy.module';
-import { PatientAllergy, PatientAllergySchema } from 'src/modules/patient-allergy/schema/patient-allergy.schema';
 
 @Module({
   imports: [
@@ -20,10 +18,10 @@ import { PatientAllergy, PatientAllergySchema } from 'src/modules/patient-allerg
       { name: PatientAnswer.name, schema: PatientAnswerSchema },
       { name: User.name, schema: UserSchema },
     ]),
-    PatientAllergyModule,
+    DrugModule
   ],
   controllers: [OnboardingController],
-  providers: [OnboardingService, AllergyExtractorService, RiskScorerService],
+  providers: [OnboardingService],
   exports: [OnboardingService],
 })
 export class OnboardingModule {}

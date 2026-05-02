@@ -16,6 +16,13 @@ export class RegisterDto {
   email: string;
 
   @ApiPropertyOptional({
+    example: '+1234567890',
+  })
+  @IsString()
+  @IsOptional()
+  phoneNumber?: string;
+
+  @ApiPropertyOptional({
     example: 'user',
   })
   @IsString()

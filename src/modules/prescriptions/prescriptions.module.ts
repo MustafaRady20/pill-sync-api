@@ -3,16 +3,16 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { PrescriptionsService } from './prescriptions.service';
 import { PrescriptionsController } from './prescriptions.controller';
-import { SafetyCheckService } from './safety-check.service';
+// import { SafetyCheckService } from './safety-check.service';
 import { Prescription, PrescriptionSchema } from './schema/prescription.schema';
 import { InteractionsModule } from 'src/modules/interactions/interactions.module';
 import { DrugModule } from 'src/modules/drug/drug.module';
-import { PatientAllergyModule } from 'src/modules/patient-allergy/patient-allergy.module';
+// import { PatientAllergyModule } from 'src/modules/patient-allergy/patient-allergy.module';
 import { Drug, DrugSchema } from 'src/modules/drug/schemas/drug.schema';
-import {
-  PatientAllergy,
-  PatientAllergySchema,
-} from 'src/modules/patient-allergy/schema/patient-allergy.schema';
+// import {
+//   PatientAllergy,
+//   PatientAllergySchema,
+// } from 'src/modules/patient-allergy/schema/patient-allergy.schema';
 import {
   DrugDrugInteraction,
   DrugDrugInteractionSchema,
@@ -27,7 +27,6 @@ import {
     MongooseModule.forFeature([
       { name: Prescription.name, schema: PrescriptionSchema },
       { name: Drug.name, schema: DrugSchema },
-      { name: PatientAllergy.name, schema: PatientAllergySchema },
       { name: DrugDrugInteraction.name, schema: DrugDrugInteractionSchema },
       {
         name: DrugDiseaseInteraction.name,
@@ -35,11 +34,10 @@ import {
       },
     ]),
     InteractionsModule, 
-    PatientAllergyModule, 
     DrugModule, 
   ],
   controllers: [PrescriptionsController],
-  providers: [PrescriptionsService, SafetyCheckService],
+  providers: [PrescriptionsService],
   exports: [PrescriptionsService],
 })
 export class PrescriptionsModule {}
