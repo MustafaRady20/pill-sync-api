@@ -9,7 +9,6 @@ import { InteractionsModule } from './modules/interactions/interactions.module';
 import { OnboardingModule } from './modules/onboarding/onboarding.module';
 import { PrescriptionsModule } from './modules/prescriptions/prescriptions.module';
 import { PatientProfileModule } from './modules/patient-profile/patient-profile.module';
-import { PatientAllergyModule } from './modules/patient-allergy/patient-allergy.module';
 import { NotificationsModule } from './infrastructure/notifications/notifications.module';
 import { EmailModule } from './infrastructure/email/email.module';
 import { DeviceTokensModule } from './infrastructure/device-tokens/device-tokens.module';
@@ -43,7 +42,6 @@ import { VitalSignsModule } from './modules/vital-sign/vital-sign.module';
     OnboardingModule,
     PrescriptionsModule,
     PatientProfileModule,
-    PatientAllergyModule,
     QueueModule,
     NotificationsModule,
     EmailModule,

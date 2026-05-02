@@ -1,63 +1,60 @@
+// disease.controller.ts
+
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Param,
-  Patch,
-  Delete,
   Query,
+  Param,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiQuery,
+  ApiResponse,
 } from '@nestjs/swagger';
-import { CreateDiseaseDto } from './dto/create-disease.dto';
-import { UpdateDiseaseDto } from './dto/update-disease.dto';
 import { DiseaseService } from './diseases.service';
+import { Disease } from './schema/disease.schema';
 
 @ApiTags('Diseases')
 @Controller('diseases')
 export class DiseaseController {
-  constructor(private readonly diseaseService: DiseaseService) {}
+  constructor(private readonly service: DiseaseService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Create new disease' })
-  @ApiResponse({ status: 201, description: 'Disease created successfully' })
-  create(@Body() dto: CreateDiseaseDto) {
-    return this.diseaseService.create(dto);
+  @Get('search')
+  @ApiOperation({ summary: 'Search diseases with ranking' })
+  @ApiQuery({
+    name: 'q',
+    example: 'hypertension',
+    description: 'Search query',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of matched diseases',
+    type: [Disease],
+  })
+  search(@Query('q') q: string) {
+    return this.service.search(q);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get paginated diseases list' })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
-  @ApiQuery({ name: 'search', required: false })
-  findAll(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('search') search?: string,
-  ) {
-    return this.diseaseService.findAll(+page, +limit, search);
+  @Get(':code/children')
+  @ApiOperation({ summary: 'Get children of a disease node' })
+  @ApiResponse({
+    status: 200,
+    description: 'Child diseases/categories',
+    type: [Disease],
+  })
+  getChildren(@Param('code') code: string) {
+    return this.service.getChildren(code);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get disease by ID' })
-  findOne(@Param('id') id: string) {
-    return this.diseaseService.findOne(id);
-  }
-
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update disease' })
-  update(@Param('id') id: string, @Body() dto: UpdateDiseaseDto) {
-    return this.diseaseService.update(id, dto);
-  }
-
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete disease' })
-  remove(@Param('id') id: string) {
-    return this.diseaseService.remove(id);
+  @Get(':code/parents')
+  @ApiOperation({ summary: 'Get parent chain of a disease' })
+  @ApiResponse({
+    status: 200,
+    description: 'Parent hierarchy',
+    type: [Disease],
+  })
+  getParents(@Param('code') code: string) {
+    return this.service.getParents(code);
   }
 }

@@ -7,7 +7,6 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Prescription, PrescriptionDocument, PrescriptionStatus } from './schema/prescription.schema';
-import { SafetyCheckService } from './safety-check.service';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 import { SafetyOverrideDto } from './dto/safety-override.dto';
 
@@ -17,7 +16,6 @@ export class PrescriptionsService {
   constructor(
     @InjectModel(Prescription.name)
     private prescriptionModel: Model<PrescriptionDocument>,
-    private safetyCheckService: SafetyCheckService,
   ) {}
 
   // ─── Doctor: create draft ────────────────────────────────────────────────
@@ -60,26 +58,26 @@ export class PrescriptionsService {
 
     const allDrugIds = [...new Set([...newDrugIds, ...existingDrugIds])];
 
-    const safetyResult = await this.safetyCheckService.runFullCheck(
-      prescription.patientId.toString(),
-      allDrugIds,
-    );
+    // const safetyResult = await this.safetyCheckService.runFullCheck(
+    //   prescription.patientId.toString(),
+    //   allDrugIds,
+    // );
 
 
-    if (safetyResult.passed) {
-      prescription.status = PrescriptionStatus.ACTIVE;
-      prescription.prescribedAt = new Date();
-    }
+    // if (safetyResult.passed) {
+    //   prescription.status = PrescriptionStatus.ACTIVE;
+    //   prescription.prescribedAt = new Date();
+    // }
 
     await prescription.save();
 
-    if (!safetyResult.passed) {
+    // if (!safetyResult.passed) {
 
-      throw new BadRequestException({
-        message: 'Safety check failed — review warnings before activating',
-        safetyCheckResult: safetyResult,
-      });
-    }
+    //   throw new BadRequestException({
+    //     message: 'Safety check failed — review warnings before activating',
+    //     safetyCheckResult: safetyResult,
+    //   });
+    // }
 
     return prescription;
   }

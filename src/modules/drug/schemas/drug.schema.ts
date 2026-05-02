@@ -30,44 +30,82 @@ export enum DrugRoute {
 
 @Schema({ timestamps: true })
 export class Drug {
-  @Prop({ type: String, required: true, index: true, trim: true })
-  senomeCode: string;  
+  @Prop({ required: true, index: true })
+  senomeCode: string;
 
-  @Prop({ type: String, required: true, index: true, trim: true })
+  @Prop({ required: true, index: true })
   tradeName: string;
 
-  @Prop({ type: String, required: true, index: true, trim: true })
+  @Prop({ required: true, index: true })
   genericName: string;
 
-  
-  @Prop({ type: String, required: true })
-  dose: string;
+  @Prop({ type: [String], default: [], index: true })
+  synonyms: string[];
 
-  @Prop({ type: String, required: false })
-  strength?: string;
-
-  @Prop({ type: String, required: true, enum: DrugForm })
-  form: DrugForm;
-
-  @Prop({ type: String, required: true, enum: DrugRoute })
-  route: DrugRoute;
-
-  @Prop({ type: String, trim: true })
-  manufacturer?: string;
-
-  @Prop({ type: String })
-  description?: string;
-
- 
   @Prop({ type: [String], default: [], index: true })
   similarTradeNames: string[];
 
+  @Prop({ type: [{ name: String, strength: String }], default: [] })
+  activeIngredients: { name: string; strength?: string }[];
+
+  @Prop({ required: true })
+  dose: string;
+
+  @Prop()
+  strength?: string;
+
+  @Prop({ enum: DrugForm, required: true })
+  form: DrugForm;
+
+  @Prop({ enum: DrugRoute, required: true })
+  route: DrugRoute;
+
   @Prop({ type: [String], default: [] })
-  activeIngredients: string[];
+  dosageInstructions: string[];
 
+  @Prop()
+  manufacturer?: string;
 
-  @Prop({ type: String })
+  @Prop()
   atcCode?: string;
+
+  @Prop()
+  registrationNumber?: string;
+
+  @Prop()
+  description?: string;
+
+  @Prop({ type: [String], default: [] })
+  indications: string[];
+
+  @Prop({ type: [String], default: [] })
+  contraindications: string[];
+
+  @Prop({ type: [String], default: [] })
+  warnings: string[];
+
+  @Prop({ type: [String], default: [] })
+  precautions: string[];
+
+  // ⚠️ Safety
+  @Prop({ type: [String], default: [] })
+  sideEffects: string[];
+
+  @Prop({ type: [String], default: [] })
+  interactions: string[];
+
+  @Prop({ type: [String], default: [] })
+  lifestyleInteractions: string[];
+
+  @Prop()
+  mechanismOfAction?: string;
+
+  @Prop()
+  pharmacokinetics?: string;
+
+  
+  @Prop({ type: Object })
+  rawData?: Record<string, any>; 
 }
 
 export const DrugSchema = SchemaFactory.createForClass(Drug);

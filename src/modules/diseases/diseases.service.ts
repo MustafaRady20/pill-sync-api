@@ -1,80 +1,115 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+// disease.service.ts
+
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateDiseaseDto } from './dto/create-disease.dto';
-import { UpdateDiseaseDto } from './dto/update-disease.dto';
-import { Disease, DiseaseDocument } from './schema/disease.schema';
+import { Model, Document } from 'mongoose';
+import { Disease } from './schema/disease.schema';
+
+const FAMILY_MAP = {
+  CV: 'Cardiovascular diseases',
+  EN: 'Endocrinal disease',
+};
 
 @Injectable()
 export class DiseaseService {
   constructor(
     @InjectModel(Disease.name)
-    private readonly diseaseModel: Model<DiseaseDocument>,
+    private diseaseModel: Model<Disease>,
   ) {}
 
-  async create(dto: CreateDiseaseDto) {
-    try {
-      return await this.diseaseModel.create(dto);
-    } catch (error) {
-      if (error.code === 11000) {
-        throw new ConflictException('Disease code must be unique');
-      }
-      throw error;
-    }
+  // 🧠 Helpers
+  private getLevel(code: string) {
+    if (code.length === 2) return 1;
+    if (code.length === 3) return 2;
+    if (code.length === 5) return 3;
+    return 4;
   }
 
-  async findAll(page = 1, limit = 10, search?: string) {
-    const filter = search
-      ? {
-          $or: [
-            { name: { $regex: search, $options: 'i' } },
-            { similarNames: { $regex: search, $options: 'i' } },
-          ],
-        }
-      : {};
+  private getParent(code: string) {
+    if (code.length <= 2) return null;
+    if (code.length === 3) return code.slice(0, 2);
+    if (code.length === 5) return code.slice(0, 3);
+    return code.slice(0, 5);
+  }
 
-    const [data, total] = await Promise.all([
-      this.diseaseModel
-        .find(filter)
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .sort({ createdAt: -1 }),
-      this.diseaseModel.countDocuments(filter),
+  // 🔥 Create (manual)
+  async create(data: Partial<Disease>) {
+    return this.diseaseModel.create(data);
+  }
+
+  // 🔍 Smart Search
+  async search(query: string) {
+    return this.diseaseModel.aggregate([
+      {
+        $match: { $text: { $search: query } },
+      },
+      {
+        $addFields: {
+          score: { $meta: 'textScore' },
+        },
+      },
+      {
+        $addFields: {
+          levelBoost: {
+            $switch: {
+              branches: [
+                { case: { $eq: ['$level', 4] }, then: 3 },
+                { case: { $eq: ['$level', 3] }, then: 2 },
+                { case: { $eq: ['$level', 2] }, then: 1 },
+              ],
+              default: 0,
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          finalScore: { $add: ['$score', '$levelBoost'] },
+        },
+      },
+      { $sort: { finalScore: -1 } },
+      { $limit: 20 },
     ]);
-
-    return {
-      data,
-      total,
-      page,
-      lastPage: Math.ceil(total / limit),
-    };
   }
 
-  async findOne(id: string) {
-    const disease = await this.diseaseModel.findById(id);
-    if (!disease) throw new NotFoundException('Disease not found');
-    return disease;
+  // 🌳 Tree APIs
+  async getChildren(code: string) {
+    return this.diseaseModel.find({ parentCode: code });
   }
 
-  async update(id: string, dto: UpdateDiseaseDto) {
-    const updated = await this.diseaseModel.findByIdAndUpdate(
-      id,
-      dto,
-      { new: true },
+  async getParents(code: string) {
+    const chain: (Document & Disease)[] = [];
+    let current = await this.diseaseModel.findOne({ diseaseCode: code });
+
+    while (current?.parentCode) {
+      const parent = await this.diseaseModel.findOne({
+        diseaseCode: current.parentCode,
+      });
+      if (!parent) break;
+
+      chain.unshift(parent);
+      current = parent;
+    }
+
+    return chain;
+  }
+
+  // 🔥 Import helper (used in script)
+  async upsert(doc: any) {
+    const familyCode = doc.diseaseCode.slice(0, 2);
+
+    return this.diseaseModel.updateOne(
+      { diseaseCode: doc.diseaseCode },
+      {
+        $set: {
+          ...doc,
+          familyCode,
+          family: FAMILY_MAP[familyCode] || 'Other',
+          parentCode: this.getParent(doc.diseaseCode),
+          level: this.getLevel(doc.diseaseCode),
+        },
+      },
+      { upsert: true },
     );
-
-    if (!updated) throw new NotFoundException('Disease not found');
-    return updated;
-  }
-
-  async remove(id: string) {
-    const deleted = await this.diseaseModel.findByIdAndDelete(id);
-    if (!deleted) throw new NotFoundException('Disease not found');
-
-    return { message: 'Disease deleted successfully' };
   }
 }
