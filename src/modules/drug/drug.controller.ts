@@ -7,13 +7,17 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { DrugService } from './drug.service';
 import { CreateDrugDto } from './dto/create-drug.dto';
 import { UpdateDrugDto } from './dto/update-drug.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Drugs')
+@UseGuards(AuthGuard("jwt"))
+@ApiBearerAuth("accessToken")
 @Controller('drugs')
 export class DrugController {
   constructor(private readonly drugService: DrugService) {}

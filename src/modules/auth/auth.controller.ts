@@ -50,9 +50,9 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto) {
-    console.log('Logging in user:', dto.identifier);
-    return this.authService.login(dto);
+  async login(@CurrentUser() user: userSchema.UserDocument, @Body() dto: LoginDto) {
+    console.log('Logging in user:', user.email);
+    return this.authService.login(user);
   }
 
   @Post('google')
