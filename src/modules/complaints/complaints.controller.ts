@@ -1,17 +1,22 @@
 import {
   Controller, Get, Post, Patch, Delete,
   Param, Body, HttpCode, HttpStatus,
+  UseGuards,
 } from "@nestjs/common";
 import {
   ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody,
+  ApiBearerAuth,
 } from "@nestjs/swagger";
 import { ComplaintsService } from "./complaints.service";
 import { CreateComplaintDto } from "./dtos/create-complaint.dto";
+import { AuthGuard } from "@nestjs/passport";
 
 @ApiTags("Complaints")
+@UseGuards(AuthGuard("jwt"))
+@ApiBearerAuth("accessToken")
 @Controller("complaints")
 export class ComplaintsController {
-  constructor(private readonly complaintsService: ComplaintsService) {}
+  constructor(private readonly complaintsService: ComplaintsService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

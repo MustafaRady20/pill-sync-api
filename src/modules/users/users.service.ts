@@ -84,7 +84,7 @@ export class UsersService {
         { email: identifier.toLowerCase() },
         { phoneNumber: identifier },
       ],
-    });
+    }).select('+password');
   }
 
   async findById(id: string): Promise<UserDocument | null> {

@@ -5,17 +5,22 @@ import {
   Get,
   Query,
   Param,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiQuery,
   ApiResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { DiseaseService } from './diseases.service';
 import { Disease } from './schema/disease.schema';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Diseases')
+@UseGuards(AuthGuard("jwt"))
+@ApiBearerAuth("accessToken")
 @Controller('diseases')
 export class DiseaseController {
   constructor(private readonly service: DiseaseService) {}

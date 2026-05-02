@@ -1,12 +1,16 @@
 import {
   Controller, Get, Post, Patch, Delete,
   Param, Body, HttpCode, HttpStatus,
+  UseGuards,
 } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from "@nestjs/swagger";
 import { AppointmentsService } from "./appointments.service";
 import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
+import { AuthGuard } from "@nestjs/passport";
 
 @ApiTags("Appointments")
+@UseGuards(AuthGuard("jwt"))
+@ApiBearerAuth("accessToken")
 @Controller("appointments")
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}

@@ -99,10 +99,7 @@ export class AuthService {
   }
 
 
-async login(dto: LoginDto) {
-  const user = await this.validateUser(dto.identifier, dto.password);
-  if (!user) throw new UnauthorizedException();
- 
+async login(user: UserDocument) {
   const tokens = await this.generateTokens(user);
   await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
 

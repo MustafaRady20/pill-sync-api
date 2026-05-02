@@ -11,10 +11,11 @@ import {
   Param,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AllergiesDto, MedicalConditionDto, MedicalHistoryDto, PersonalInfoDto } from './dto/onboarding.dto';
 import type {  UserDocument } from './schemas/user.schema';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController {
@@ -23,6 +24,8 @@ export class UserController {
 
 
   @Post('personal-info')
+  @UseGuards(AuthGuard("jwt"))
+  @ApiBearerAuth("accessToken")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Step 1 — Save personal info (name, DOB, gender, weight, height…)' })
   @ApiResponse({ status: 200, description: 'Profile created / updated at step 1' })
