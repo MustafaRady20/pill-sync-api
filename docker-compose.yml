@@ -11,8 +11,6 @@ services:
       - .env
     ports:
       - '3000:3000'
-    volumes:
-      - .:/app
     command: npm run start
     depends_on:
       redis:
@@ -41,27 +39,10 @@ services:
       retries: 5
     networks:
       - notification-net
-
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: notification-redis-ui
-    restart: unless-stopped
-    ports:
-      - '8082:8081'
-    environment:
-      REDIS_HOSTS: local:redis:6379:0:${REDIS_PASSWORD}
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - notification-net
-
   mongodb:
     image: mongo:7
     container_name: mongodb
     restart: always
-    ports:
-      - "27018:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -69,11 +50,9 @@ services:
       - mongo_data:/data/db
     networks:
       - notification-net
-
 volumes:
   redis-data:
   mongo_data:
-
 networks:
   notification-net:
     driver: bridge
