@@ -10,10 +10,11 @@ import {
 import { ComplaintsService } from "./complaints.service";
 import { CreateComplaintDto } from "./dtos/create-complaint.dto";
 import { AuthGuard } from "@nestjs/passport";
+import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 
 @ApiTags("Complaints")
-@UseGuards(AuthGuard("jwt"))
 @ApiBearerAuth("accessToken")
+@UseGuards(JwtAuthGuard)
 @Controller("complaints")
 export class ComplaintsController {
   constructor(private readonly complaintsService: ComplaintsService) { }
