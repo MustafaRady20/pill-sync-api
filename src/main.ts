@@ -26,7 +26,14 @@ async function bootstrap() {
     .setTitle('Pill-Sync API')
     .setDescription('API for Pill-Sync app')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth(
+    {
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+    },
+    'accessToken', 
+  )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
