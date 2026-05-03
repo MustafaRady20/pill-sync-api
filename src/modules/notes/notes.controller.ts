@@ -1,16 +1,21 @@
 import {
   Controller, Get, Post, Patch, Delete,
   Param, Body, Query, HttpCode, HttpStatus,
+  UseGuards,
 } from "@nestjs/common";
 import {
   ApiTags, ApiOperation, ApiResponse,
   ApiParam, ApiBody, ApiQuery,
+  ApiBearerAuth,
 } from "@nestjs/swagger";
 import { NotesService } from "./notes.service";
 import { CreateNoteDto } from "./dto/create-note.dto";
 import { NoteType } from "./schema/note.schema";
+import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 
 @ApiTags("Notes")
+@ApiBearerAuth("accessToken")
+@UseGuards(JwtAuthGuard)
 @Controller("notes")
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}

@@ -7,10 +7,11 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } 
 import { AppointmentsService } from "./appointments.service";
 import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
 import { AuthGuard } from "@nestjs/passport";
+import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 
 @ApiTags("Appointments")
-@UseGuards(AuthGuard("jwt"))
 @ApiBearerAuth("accessToken")
+@UseGuards(JwtAuthGuard)
 @Controller("appointments")
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}

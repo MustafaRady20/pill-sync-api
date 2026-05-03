@@ -17,10 +17,11 @@ import {
 import { DiseaseService } from './diseases.service';
 import { Disease } from './schema/disease.schema';
 import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
 
 @ApiTags('Diseases')
-@UseGuards(AuthGuard("jwt"))
 @ApiBearerAuth("accessToken")
+  @UseGuards(JwtAuthGuard)
 @Controller('diseases')
 export class DiseaseController {
   constructor(private readonly service: DiseaseService) {}
