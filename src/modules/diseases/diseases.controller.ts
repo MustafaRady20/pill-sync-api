@@ -26,20 +26,25 @@ import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
 export class DiseaseController {
   constructor(private readonly service: DiseaseService) {}
 
+ 
   @Get('search')
   @ApiOperation({ summary: 'Search diseases with ranking' })
   @ApiQuery({
     name: 'q',
     example: 'hypertension',
     description: 'Search query',
+    required:false
   })
   @ApiResponse({
     status: 200,
     description: 'List of matched diseases',
     type: [Disease],
   })
-  search(@Query('q') q: string) {
-    return this.service.search(q);
+  search(@Query('q') q?: string) {
+    if(q){
+      return this.service.search(q);
+    }
+    return this.service.findAll();
   }
 
   @Get(':code/children')

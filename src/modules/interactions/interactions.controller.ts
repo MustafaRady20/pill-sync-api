@@ -31,7 +31,8 @@ import { RolesGuard } from 'src/modules/auth/guards/role.guard';
 import { UserRole } from 'src/modules/users/schemas/user.schema';
 import { Roles } from 'src/modules/auth/decorators/roles.decorator';
 import { DrugDiseaseService } from './drug-disease-interaction.service';
-import { InteractionRelation, InteractionSeverity } from './schema/drug-disease-interaction.schema';
+import { DrugDiseaseRelation, InteractionSeverity } from './schema/drug-disease-interaction.schema';
+import { DrugDrugRelation } from './schema/drug-drug-interaction.schema';
 
 
 // Drug–Drug Interactions
@@ -132,10 +133,10 @@ export class DrugDiseaseController {
   @Get()
   @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ summary: 'List all drug–disease interactions, optionally filtered' })
-  @ApiQuery({ name: 'relation', enum: InteractionRelation, required: false })
+  @ApiQuery({ name: 'relation', enum: DrugDiseaseRelation, required: false })
   @ApiQuery({ name: 'severity', enum: InteractionSeverity, required: false })
   findAll(
-    @Query('relation') relation?: InteractionRelation,
+    @Query('relation') relation?: DrugDiseaseRelation,
     @Query('severity') severity?: InteractionSeverity,
   ) {
     return this.drugDiseaseService.findAll({ relation, severity });
@@ -144,10 +145,10 @@ export class DrugDiseaseController {
   @Get('drug/:drugId')
   @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ summary: 'All interactions for a drug (indications, contraindications, side effects)' })
-  @ApiQuery({ name: 'relation', enum: InteractionRelation, required: false })
+  @ApiQuery({ name: 'relation', enum: DrugDrugRelation, required: false })
   findForDrug(
     @Param('drugId') drugId: string,
-    @Query('relation') relation?: InteractionRelation,
+    @Query('relation') relation?: DrugDiseaseRelation,
   ) {
     return this.drugDiseaseService.findForDrug(drugId, relation);
   }
@@ -155,10 +156,10 @@ export class DrugDiseaseController {
   @Get('disease/:diseaseId')
   @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ summary: 'All drugs that interact with a disease' })
-  @ApiQuery({ name: 'relation', enum: InteractionRelation, required: false })
+  @ApiQuery({ name: 'relation', enum: DrugDiseaseRelation, required: false })
   findForDisease(
     @Param('diseaseId') diseaseId: string,
-    @Query('relation') relation?: InteractionRelation,
+    @Query('relation') relation?: DrugDiseaseRelation,
   ) {
     return this.drugDiseaseService.findForDisease(diseaseId, relation);
   }

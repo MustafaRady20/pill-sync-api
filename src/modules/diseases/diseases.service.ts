@@ -17,6 +17,10 @@ export class DiseaseService {
     private diseaseModel: Model<Disease>,
   ) {}
 
+  async findAll(){
+    return this.diseaseModel.find().exec();
+  }
+
   // 🧠 Helpers
   private getLevel(code: string) {
     if (code.length === 2) return 1;
@@ -112,4 +116,6 @@ export class DiseaseService {
       { upsert: true },
     );
   }
+
+
 }

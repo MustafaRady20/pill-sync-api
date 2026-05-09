@@ -15,7 +15,7 @@ export class DrugService {
     private readonly cacheService: CacheService,
   ) {}
 
-  async create(dto: CreateDrugDto): Promise<Drug> {
+  async create(dto: Partial<DrugDocument>): Promise<Drug> {
     const drug = await this.drugModel.create(dto);
 
     await this.cacheService.del('drugs:list');

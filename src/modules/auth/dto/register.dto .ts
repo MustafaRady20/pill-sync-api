@@ -38,19 +38,6 @@ export class RegisterDto {
   @IsNotEmpty()
   password: string;
 
-  @ApiPropertyOptional({
-    example: 'Mostafa',
-  })
-  @IsString()
-  @IsOptional()
-  firstName?: string;
-
-  @ApiPropertyOptional({
-    example: 'Kamel',
-  })
-  @IsString()
-  @IsOptional()
-  lastName?: string;
 
   @ApiPropertyOptional({
     example: '109384029384029384',

@@ -14,6 +14,7 @@ import { DrugService } from './drug.service';
 import { CreateDrugDto } from './dto/create-drug.dto';
 import { UpdateDrugDto } from './dto/update-drug.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { DrugDocument } from './schemas/drug.schema';
 
 @ApiTags('Drugs')
 @UseGuards(AuthGuard("jwt"))
@@ -23,7 +24,7 @@ export class DrugController {
   constructor(private readonly drugService: DrugService) {}
 
   @Post()
-  create(@Body() dto: CreateDrugDto) {
+  create(@Body() dto: Partial<DrugDocument>) {
     return this.drugService.create(dto);
   }
 

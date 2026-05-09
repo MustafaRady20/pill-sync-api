@@ -20,27 +20,96 @@ async function bootstrap() {
   const workbook = xlsx.readFile(filePath); const sheet = workbook.Sheets['Dim4'];
   const rows = xlsx.utils.sheet_to_json<any>(sheet);
 
-  for (const row of rows) {
-    const similarNames: string[] = [];
+  let currentFamily: any = null;
+let currentCategory: any = null;
+let currentParent: any = null;
 
-    for (let i = 1; i <= 10; i++) {
-      const key = `Similar${i}`;
-      if (row[key]) similarNames.push(row[key].toString().trim());
+for (const row of rows) {
+  const code = row['Disease code']?.toString().trim();
+  const name = row['Disease name']?.toString().trim();
+
+  if (!code || !name) continue;
+
+  const similarNames: string[] = [];
+
+  for (let i = 1; i <= 10; i++) {
+    const key = `Similar${i}`;
+
+    if (row[key]) {
+      similarNames.push(row[key].toString().trim());
     }
-
-    const doc = {
-      diseaseCode: row['Disease code']?.toString().trim(),
-      name: row['Disease name']?.toString().trim(),
-      similarNames: [...new Set(similarNames)],
-    };
-
-    if (!doc.name || !doc.diseaseCode) continue;
-
-    await service.upsert(doc);
   }
 
-  console.log('Import finished');
-  await app.close();
+  let level = 1;
+  let family = '';
+  let familyCode = '';
+  let parentCode = '';
+
+  // LEVEL 1 => FAMILY
+  if (code.length === 2) {
+    level = 1;
+
+    currentFamily = {
+      code,
+      name,
+    };
+
+    family = name;
+    familyCode = code;
+  }
+
+  // LEVEL 2 => CATEGORY
+  else if (code.length === 3) {
+    level = 2;
+
+    currentCategory = {
+      code,
+      name,
+    };
+
+    family = currentFamily?.name;
+    familyCode = currentFamily?.code;
+    parentCode = currentFamily?.code;
+  }
+
+  // LEVEL 3 => PARENT
+  else if (code.length === 5) {
+    level = 3;
+
+    currentParent = {
+      code,
+      name,
+    };
+
+    family = currentFamily?.name;
+    familyCode = currentFamily?.code;
+    parentCode = currentCategory?.code;
+  }
+
+  // LEVEL 4 => CHILD
+  else {
+    level = 4;
+
+    family = currentFamily?.name;
+    familyCode = currentFamily?.code;
+    parentCode = currentParent?.code;
+  }
+
+  const doc = {
+    diseaseCode: code,
+    name,
+    similarNames: [...new Set(similarNames)],
+    family,
+    familyCode,
+    parentCode,
+    level,
+  };
+
+  await service.upsert(doc);
+
+  console.log(`Imported: ${code} - ${name}`);
 }
+}
+
 
 bootstrap();

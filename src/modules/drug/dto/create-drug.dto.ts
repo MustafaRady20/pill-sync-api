@@ -44,4 +44,9 @@ export class CreateDrugDto {
   @IsOptional()
   @IsArray()
   similarTradeNames?: string[];
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  synonyms?: string[];
 }
