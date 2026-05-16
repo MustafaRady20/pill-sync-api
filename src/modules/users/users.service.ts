@@ -39,8 +39,6 @@ export class UsersService {
       email: dto.email,
       phoneNumber: dto.phoneNumber,
       password: hashed,
-      firstName: dto.firstName,
-      lastName: dto.lastName,
       provider: AuthProvider.LOCAL,
     });
     return user.save();

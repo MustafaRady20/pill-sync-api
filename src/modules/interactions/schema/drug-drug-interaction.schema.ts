@@ -1,10 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { InteractionRelation } from './drug-disease-interaction.schema';
 import { DrugInteractionSeverity } from '../enums/relations.enum';
 
 export type DrugDrugInteractionDocument = DrugDrugInteraction & Document;
 
+export enum DrugDrugRelation {
+  INTERACTION = 'interaction',
+  CONTRAINDICATION = 'contraindication',
+  SYNERGY = 'synergy',
+  DUPLICATION = 'duplication',
+}
 
 @Schema({ timestamps: true })
 export class DrugDrugInteraction {
@@ -15,8 +20,8 @@ export class DrugDrugInteraction {
   @Prop({ type: Types.ObjectId, ref: 'Drug', required: true, index: true })
   drug_b: Types.ObjectId;
 
-  @Prop({ type: String, required: true, enum: InteractionRelation })
-    relation: InteractionRelation;
+  @Prop({ type: String, required: true, enum: DrugDrugRelation })
+    relation: DrugDrugRelation;
 
   @Prop({ type: String, required: true, enum: DrugInteractionSeverity })
   severity: DrugInteractionSeverity;

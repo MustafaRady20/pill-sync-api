@@ -3,16 +3,14 @@ import { Document, Types } from 'mongoose';
 
 export type DrugDiseaseInteractionDocument = DrugDiseaseInteraction & Document;
 
-export enum InteractionRelation {
-  INDICATION = 'Indication',         
-  SIDE_EFFECT = 'Side-Effect',      
-  CONTRAINDICATION = 'Contraindication', 
-  CAUTION = 'Caution',                   
-  SAFE = 'Safe',               
+export enum DrugDiseaseRelation {
+  INDICATION = 'indication',
+  SIDE_EFFECT = 'side_effect',
+  CONTRAINDICATION = 'contraindication',
+  CAUTION = 'caution',
+  SAFE = 'safe',
 }
 
-// TODO
-// لم يتم العثور على تفاعلات بينهم 
 
 export enum InteractionSeverity {
   MILD = 'mild',
@@ -29,8 +27,8 @@ export class DrugDiseaseInteraction {
   @Prop({ type: Types.ObjectId, ref: 'Disease', required: true, index: true })
   disease: Types.ObjectId;
 
-  @Prop({ type: String, required: true, enum: InteractionRelation })
-  relation: InteractionRelation;
+  @Prop({ type: String, required: true, enum: DrugDiseaseRelation })
+  relation: DrugDiseaseRelation;
 
   @Prop({ type: String, required: true, enum: InteractionSeverity })
   severity: InteractionSeverity;

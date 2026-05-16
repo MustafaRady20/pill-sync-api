@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { DrugDiseaseInteraction, DrugDiseaseInteractionDocument, InteractionRelation, InteractionSeverity } from './schema/drug-disease-interaction.schema';
+import { DrugDiseaseInteraction, DrugDiseaseInteractionDocument, DrugDiseaseRelation, InteractionSeverity } from './schema/drug-disease-interaction.schema';
 import { CreateDrugDiseaseInteractionDto, UpdateDrugDiseaseInteractionDto } from './dtos/drug-disease-interaction.dto';
 
 
@@ -45,7 +45,7 @@ export class DrugDiseaseService {
   // ─── Read ─────────────────────────────────────────────────────────────────
 
   async findAll(filters?: {
-    relation?: InteractionRelation;
+    relation?: DrugDiseaseRelation;
     severity?: InteractionSeverity;
   }): Promise<DrugDiseaseInteractionDocument[]> {
     const query: Record<string, any> = {};
@@ -72,7 +72,7 @@ export class DrugDiseaseService {
 
   async findForDrug(
     drugId: string,
-    relation?: InteractionRelation,
+    relation?: DrugDiseaseRelation,
   ): Promise<DrugDiseaseInteractionDocument[]> {
     const query: Record<string, any> = { drug: new Types.ObjectId(drugId) };
     if (relation) query.relation = relation;
@@ -87,7 +87,7 @@ export class DrugDiseaseService {
 
   async findForDisease(
     diseaseId: string,
-    relation?: InteractionRelation,
+    relation?: DrugDiseaseRelation,
   ): Promise<DrugDiseaseInteractionDocument[]> {
     const query: Record<string, any> = { disease: new Types.ObjectId(diseaseId) };
     if (relation) query.relation = relation;
@@ -111,7 +111,7 @@ export class DrugDiseaseService {
         drug: { $in: drugIds.map((id) => new Types.ObjectId(id)) },
         disease: { $in: diseaseIds.map((id) => new Types.ObjectId(id)) },
         relation: {
-          $in: [InteractionRelation.CONTRAINDICATION, InteractionRelation.CAUTION],
+          $in: [DrugDiseaseRelation.CONTRAINDICATION, DrugDiseaseRelation.CAUTION],
         },
       })
       .populate('drug', 'tradeName genericName')
@@ -128,7 +128,7 @@ export class DrugDiseaseService {
     return this.model
       .find({
         drug: { $in: drugIds.map((id) => new Types.ObjectId(id)) },
-        relation: InteractionRelation.INDICATION,
+        relation: DrugDiseaseRelation.INDICATION,
       })
       .populate('disease', 'name diseaseCode')
       .lean();

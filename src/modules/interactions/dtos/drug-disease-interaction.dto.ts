@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsEnum, IsMongoId, IsOptional, IsString } from 'class-validator';
-import { InteractionRelation, InteractionSeverity } from '../schema/drug-disease-interaction.schema';
+import { DrugDiseaseRelation, InteractionSeverity } from '../schema/drug-disease-interaction.schema';
 
 export class CreateDrugDiseaseInteractionDto {
   @ApiProperty({ example: '665f1a2b3c4d5e6f7a8b9c0d' })
@@ -11,9 +11,9 @@ export class CreateDrugDiseaseInteractionDto {
   @IsMongoId()
   disease: string;
 
-  @ApiProperty({ enum: InteractionRelation, example: InteractionRelation.CONTRAINDICATION })
-  @IsEnum(InteractionRelation)
-  relation: InteractionRelation;
+  @ApiProperty({ enum: DrugDiseaseRelation, example: DrugDiseaseRelation.CONTRAINDICATION })
+  @IsEnum(DrugDiseaseRelation)
+  relation: DrugDiseaseRelation;
 
   @ApiProperty({ enum: InteractionSeverity, example: InteractionSeverity.CONTRAINDICATED })
   @IsEnum(InteractionSeverity)
