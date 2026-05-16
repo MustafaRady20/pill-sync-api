@@ -7,6 +7,7 @@ import {
 export class CreateAppointmentDto {
 
   @ApiProperty({  example: "in-person" })
+  @IsString()
   type: string;
 
   @ApiProperty({ example: "Dr. John Smith" })
