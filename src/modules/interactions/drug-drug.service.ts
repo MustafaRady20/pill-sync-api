@@ -6,8 +6,14 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { DrugDrugInteraction, DrugDrugInteractionDocument } from './schema/drug-drug-interaction.schema';
-import { CreateDrugDrugInteractionDto, UpdateDrugDrugInteractionDto } from './dtos/drug-drug-interaction.dto';
+import {
+  DrugDrugInteraction,
+  DrugDrugInteractionDocument,
+} from './schema/drug-drug-interaction.schema';
+import {
+  CreateDrugDrugInteractionDto,
+  UpdateDrugDrugInteractionDto,
+} from './dtos/drug-drug-interaction.dto';
 
 @Injectable()
 export class DrugDrugService {
@@ -16,10 +22,13 @@ export class DrugDrugService {
     private model: Model<DrugDrugInteractionDocument>,
   ) {}
 
-
-  async create(dto: CreateDrugDrugInteractionDto): Promise<DrugDrugInteractionDocument> {
+  async create(
+    dto: CreateDrugDrugInteractionDto,
+  ): Promise<DrugDrugInteractionDocument> {
     if (dto.drug_a === dto.drug_b) {
-      throw new BadRequestException('drug_a and drug_b must be different drugs');
+      throw new BadRequestException(
+        'drug_a and drug_b must be different drugs',
+      );
     }
 
     const [drug_a, drug_b] = this.sortPair(dto.drug_a, dto.drug_b);
@@ -43,7 +52,6 @@ export class DrugDrugService {
       throw err;
     }
   }
-
 
   async findAll(): Promise<DrugDrugInteractionDocument[]> {
     return this.model
@@ -73,7 +81,6 @@ export class DrugDrugService {
       .lean();
   }
 
- 
   async findForPair(
     drugIdA: string,
     drugIdB: string,
@@ -86,8 +93,9 @@ export class DrugDrugService {
       .lean();
   }
 
-
-  async findForDrugList(drugIds: string[]): Promise<DrugDrugInteractionDocument[]> {
+  async findForDrugList(
+    drugIds: string[],
+  ): Promise<DrugDrugInteractionDocument[]> {
     if (drugIds.length < 2) return [];
     const objectIds = drugIds.map((id) => new Types.ObjectId(id));
     return this.model
@@ -100,19 +108,14 @@ export class DrugDrugService {
       .lean();
   }
 
-
   async update(
     id: string,
     dto: UpdateDrugDrugInteractionDto,
   ): Promise<DrugDrugInteractionDocument> {
-
     const { drug_a, drug_b, ...updateData } = dto;
 
-    const doc = await this.model.findByIdAndUpdate(
-      id,
-      { $set: updateData },
-      { new: true },
-    )
+    const doc = await this.model
+      .findByIdAndUpdate(id, { $set: updateData }, { new: true })
       .populate('drug_a', 'tradeName genericName')
       .populate('drug_b', 'tradeName genericName');
 
@@ -120,12 +123,10 @@ export class DrugDrugService {
     return doc;
   }
 
-
   async delete(id: string): Promise<void> {
     const result = await this.model.findByIdAndDelete(id);
     if (!result) throw new NotFoundException('Drug–drug interaction not found');
   }
-
 
   private sortPair(a: string, b: string): [Types.ObjectId, Types.ObjectId] {
     const oidA = new Types.ObjectId(a);

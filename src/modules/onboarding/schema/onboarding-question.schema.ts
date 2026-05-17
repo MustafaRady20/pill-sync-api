@@ -36,7 +36,10 @@ export class OnboardingQuestion {
   @Prop({ required: true, enum: OnboardingQuestionType })
   type: OnboardingQuestionType;
 
-  @Prop({ enum: OnboardingQuestionCategory, default: OnboardingQuestionCategory.OTHER })
+  @Prop({
+    enum: OnboardingQuestionCategory,
+    default: OnboardingQuestionCategory.OTHER,
+  })
   category: OnboardingQuestionCategory;
 
   @Prop({ type: [String], default: [] })
@@ -65,7 +68,6 @@ export class OnboardingQuestion {
     regex?: string;
   };
 
-
   @Prop({
     type: {
       questionKey: String,
@@ -79,6 +81,7 @@ export class OnboardingQuestion {
   };
 }
 
-export const OnboardingQuestionSchema = SchemaFactory.createForClass(OnboardingQuestion);
+export const OnboardingQuestionSchema =
+  SchemaFactory.createForClass(OnboardingQuestion);
 OnboardingQuestionSchema.index({ order: 1, isActive: 1 });
 OnboardingQuestionSchema.index({ category: 1, isActive: 1 });

@@ -9,29 +9,37 @@ import { Model, Types } from 'mongoose';
 import { User, UserDocument, AuthProvider } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from 'src/modules/auth/dto/register.dto ';
-import { MedicalCondition, UserProfile, UserProfileDocument } from './schemas/userProfile.schema';
-import { AllergiesDto, MedicalConditionDto, MedicalHistoryDto, PersonalInfoDto } from './dto/onboarding.dto';
+import {
+  MedicalCondition,
+  UserProfile,
+  UserProfileDocument,
+} from './schemas/userProfile.schema';
+import {
+  AllergiesDto,
+  MedicalConditionDto,
+  MedicalHistoryDto,
+  PersonalInfoDto,
+} from './dto/onboarding.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name)
-    
     private userModel: Model<UserDocument>,
-     @InjectModel(UserProfile.name)
+    @InjectModel(UserProfile.name)
     private profileModel: Model<UserProfileDocument>,
- 
-  ) { }
+  ) {}
 
-  async create(
-    dto: RegisterDto
-  ): Promise<UserDocument> {
+  async create(dto: RegisterDto): Promise<UserDocument> {
     const existingEmail = await this.findByEmail(dto.email);
     if (existingEmail) throw new ConflictException('Email already in use');
 
     if (dto.phoneNumber) {
-      const existingPhone = await this.userModel.findOne({ phoneNumber: dto.phoneNumber });
-      if (existingPhone) throw new ConflictException('Phone number already in use');
+      const existingPhone = await this.userModel.findOne({
+        phoneNumber: dto.phoneNumber,
+      });
+      if (existingPhone)
+        throw new ConflictException('Phone number already in use');
     }
 
     const hashed = await bcrypt.hash(dto.password, 10);
@@ -77,12 +85,11 @@ export class UsersService {
   }
 
   async findByIdentifier(identifier: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({
-      $or: [
-        { email: identifier.toLowerCase() },
-        { phoneNumber: identifier },
-      ],
-    }).select('+password');
+    return this.userModel
+      .findOne({
+        $or: [{ email: identifier.toLowerCase() }, { phoneNumber: identifier }],
+      })
+      .select('+password');
   }
 
   async findById(id: string): Promise<UserDocument | null> {
@@ -97,17 +104,11 @@ export class UsersService {
     await this.userModel.findByIdAndUpdate(userId, { refreshToken: hashed });
   }
 
-  async validateRefreshToken(
-    userId: string,
-    token: string,
-  ): Promise<boolean> {
-    const user = await this.userModel
-      .findById(userId)
-      .select('+refreshToken');
+  async validateRefreshToken(userId: string, token: string): Promise<boolean> {
+    const user = await this.userModel.findById(userId).select('+refreshToken');
     if (!user?.refreshToken) return false;
     return bcrypt.compare(token, user.refreshToken);
   }
-
 
   async markEmailVerified(userId: string): Promise<void> {
     await this.userModel.findByIdAndUpdate(userId, {
@@ -115,29 +116,42 @@ export class UsersService {
     });
   }
 
+  async updatePassword(userId: string, hashed: string): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      $set: { password: hashed },
+    });
+  }
 
   // onboarding
   private async getProfileOrFail(userId: string): Promise<UserProfileDocument> {
     const profile = await this.profileModel.findOne({
       userId: new Types.ObjectId(userId),
     });
-    if (!profile) throw new NotFoundException('Profile not found. Complete step 1 first.');
+    if (!profile)
+      throw new NotFoundException('Profile not found. Complete step 1 first.');
     return profile;
   }
- 
+
   private async guardEmailVerified(userId: string): Promise<void> {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found.');
     if (!user.isEmailVerified)
-      throw new BadRequestException('Please verify your email before completing your profile.');
+      throw new BadRequestException(
+        'Please verify your email before completing your profile.',
+      );
   }
- 
+
   // ─── Step 1: Personal Info ────────────────────────────────────────────────
- 
-  async savePersonalInfo(userId: string, dto: PersonalInfoDto): Promise<UserProfileDocument> {
+
+  async savePersonalInfo(
+    userId: string,
+    dto: PersonalInfoDto,
+  ): Promise<UserProfileDocument> {
     await this.guardEmailVerified(userId);
- 
-    const existing = await this.profileModel.findOne({ userId: new Types.ObjectId(userId) });
+
+    const existing = await this.profileModel.findOne({
+      userId: new Types.ObjectId(userId),
+    });
     if (existing && existing.onboardingStep >= 1) {
       // Allow re-saving step 1 (user might go back and edit)
       Object.assign(existing, {
@@ -146,22 +160,25 @@ export class UsersService {
       });
       return existing.save();
     }
- 
+
     const profile = new this.profileModel({
       userId: new Types.ObjectId(userId),
       ...dto,
       birthDate: new Date(dto.birthDate),
       onboardingStep: 1,
     });
- 
+
     return profile.save();
   }
- 
+
   // ─── Step 2: Allergies ────────────────────────────────────────────────────
- 
-  async saveAllergies(userId: string, dto: AllergiesDto): Promise<UserProfileDocument> {
+
+  async saveAllergies(
+    userId: string,
+    dto: AllergiesDto,
+  ): Promise<UserProfileDocument> {
     const profile = await this.getProfileOrFail(userId);
- 
+
     profile.drugAllergies = {
       predefined: dto.drugAllergies?.predefined ?? [],
       custom: dto.drugAllergies?.custom ?? [],
@@ -171,48 +188,55 @@ export class UsersService {
       custom: dto.foodAllergies?.custom ?? [],
     };
     profile.onboardingStep = Math.max(profile.onboardingStep, 2);
- 
+
     return profile.save();
   }
- 
+
   // ─── Step 3: Medical History ──────────────────────────────────────────────
- 
-  async saveMedicalHistory(userId: string, dto: MedicalHistoryDto): Promise<{ profile: UserProfileDocument }> {
+
+  async saveMedicalHistory(
+    userId: string,
+    dto: MedicalHistoryDto,
+  ): Promise<{ profile: UserProfileDocument }> {
     const profile = await this.getProfileOrFail(userId);
- 
+
     profile.hasConditions = dto.hasConditions;
-    profile.conditions = dto.hasConditions ? (dto.conditions as MedicalCondition[] ?? []) : [];
+    profile.conditions = dto.hasConditions
+      ? ((dto.conditions as MedicalCondition[]) ?? [])
+      : [];
     profile.onboardingStep = 3;
- 
+
     await profile.save();
- 
+
     // Mark user onboarding as complete
     await this.userModel.findByIdAndUpdate(userId, {
       $set: { hasCompletedOnboarding: true },
     });
- 
+
     return { profile };
   }
- 
+
   // ─── Get current profile ──────────────────────────────────────────────────
- 
+
   async getProfile(userId: string): Promise<UserProfileDocument | null> {
-    return this.profileModel.findOne({ userId: new Types.ObjectId(userId) }).populate("userId");
+    return this.profileModel
+      .findOne({ userId: new Types.ObjectId(userId) })
+      .populate('userId');
   }
- 
+
   // ─── Update a single condition (e.g. adding follow-up answers later) ──────
- 
+
   async updateCondition(
     userId: string,
     conditionIndex: number,
     updates: Partial<MedicalConditionDto>,
   ): Promise<UserProfileDocument> {
     const profile = await this.getProfileOrFail(userId);
- 
+
     if (conditionIndex < 0 || conditionIndex >= profile.conditions.length) {
       throw new BadRequestException('Invalid condition index.');
     }
- 
+
     Object.assign(profile.conditions[conditionIndex], updates);
     profile.markModified('conditions'); // Required for Mixed/nested array mutation
     return profile.save();

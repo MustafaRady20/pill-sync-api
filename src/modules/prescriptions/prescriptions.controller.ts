@@ -14,7 +14,7 @@ import { SafetyOverrideDto } from './dto/safety-override.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.auth.guard';
 import { RolesGuard } from 'src/modules/auth/guards/role.guard';
 import { Roles } from 'src/modules/auth/decorators/roles.decorator';
-import {  UserRole } from 'src/modules/users/schemas/user.schema';
+import { UserRole } from 'src/modules/users/schemas/user.schema';
 import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
 import type { UserDocument } from 'src/modules/users/schemas/user.schema';
 

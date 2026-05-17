@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
-import { CreateNoteDto } from "./dto/create-note.dto";
-import { Note, NoteDocument, NoteType } from "./schema/note.schema";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { CreateNoteDto } from './dto/create-note.dto';
+import { Note, NoteDocument, NoteType } from './schema/note.schema';
 
 @Injectable()
 export class NotesService {
@@ -20,7 +20,7 @@ export class NotesService {
   }
 
   async findAll(): Promise<NoteDocument[]> {
-    return this.noteModel.find().populate("patientId", "name email").exec();
+    return this.noteModel.find().populate('patientId', 'name email').exec();
   }
 
   async findByPatient(patientId: string): Promise<NoteDocument[]> {
@@ -30,7 +30,10 @@ export class NotesService {
       .exec();
   }
 
-  async findByPatientAndType(patientId: string, type: NoteType): Promise<NoteDocument[]> {
+  async findByPatientAndType(
+    patientId: string,
+    type: NoteType,
+  ): Promise<NoteDocument[]> {
     return this.noteModel
       .find({ patientId: new Types.ObjectId(patientId), type })
       .sort({ createdAt: -1 })
@@ -40,7 +43,7 @@ export class NotesService {
   async findOne(id: string): Promise<NoteDocument> {
     const note = await this.noteModel
       .findById(id)
-      .populate("patientId", "name email")
+      .populate('patientId', 'name email')
       .exec();
 
     if (!note) throw new NotFoundException(`Note #${id} not found`);

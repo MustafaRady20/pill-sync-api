@@ -4,7 +4,9 @@ export interface NotificationEmailContext {
   userId: string;
 }
 
-export function notificationEmailTemplate(ctx: NotificationEmailContext): string {
+export function notificationEmailTemplate(
+  ctx: NotificationEmailContext,
+): string {
   return `
 <!DOCTYPE html>
 <html>

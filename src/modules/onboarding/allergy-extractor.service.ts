@@ -15,7 +15,6 @@ export class AllergyExtractorService {
     private drugModel: Model<DrugDocument>,
   ) {}
 
-
   // async extractAndSave(patientId: string, answers: RawAllergyAnswer[]): Promise<void> {
 
   //   const allergyNames: string[] = [];
@@ -52,7 +51,7 @@ export class AllergyExtractorService {
   //             $set: {
   //               allergyType: drug ? AllergyType.DRUG : AllergyType.INGREDIENT,
   //               drugRef: drug?._id ?? undefined,
-  //               severity: AllergySeverity.UNKNOWN, 
+  //               severity: AllergySeverity.UNKNOWN,
   //               confirmedByDoctor: false,
   //               isActive: true,
   //             },

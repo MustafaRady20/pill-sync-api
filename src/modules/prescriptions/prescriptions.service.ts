@@ -6,10 +6,13 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Prescription, PrescriptionDocument, PrescriptionStatus } from './schema/prescription.schema';
+import {
+  Prescription,
+  PrescriptionDocument,
+  PrescriptionStatus,
+} from './schema/prescription.schema';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 import { SafetyOverrideDto } from './dto/safety-override.dto';
-
 
 @Injectable()
 export class PrescriptionsService {
@@ -20,7 +23,10 @@ export class PrescriptionsService {
 
   // ─── Doctor: create draft ────────────────────────────────────────────────
 
-  async create(doctorId: string, dto: CreatePrescriptionDto): Promise<PrescriptionDocument> {
+  async create(
+    doctorId: string,
+    dto: CreatePrescriptionDto,
+  ): Promise<PrescriptionDocument> {
     return this.prescriptionModel.create({
       patientId: new Types.ObjectId(dto.patientId),
       doctorId: new Types.ObjectId(doctorId),
@@ -33,7 +39,6 @@ export class PrescriptionsService {
     });
   }
 
-
   async activate(
     doctorId: string,
     prescriptionId: string,
@@ -42,7 +47,9 @@ export class PrescriptionsService {
     this.assertDoctor(prescription, doctorId);
 
     if (prescription.status !== PrescriptionStatus.DRAFT) {
-      throw new BadRequestException('Only DRAFT prescriptions can be activated');
+      throw new BadRequestException(
+        'Only DRAFT prescriptions can be activated',
+      );
     }
 
     const newDrugIds = prescription.items.map((i) => i.drug.toString());
@@ -63,7 +70,6 @@ export class PrescriptionsService {
     //   allDrugIds,
     // );
 
-
     // if (safetyResult.passed) {
     //   prescription.status = PrescriptionStatus.ACTIVE;
     //   prescription.prescribedAt = new Date();
@@ -81,7 +87,6 @@ export class PrescriptionsService {
 
     return prescription;
   }
-
 
   async overrideAndActivate(
     doctorId: string,
@@ -103,8 +108,10 @@ export class PrescriptionsService {
     return prescription.save();
   }
 
-
-  async cancel(doctorId: string, prescriptionId: string): Promise<PrescriptionDocument> {
+  async cancel(
+    doctorId: string,
+    prescriptionId: string,
+  ): Promise<PrescriptionDocument> {
     const prescription = await this.findOneOrFail(prescriptionId);
     this.assertDoctor(prescription, doctorId);
 
@@ -116,8 +123,9 @@ export class PrescriptionsService {
     return prescription.save();
   }
 
-
-  async getPatientPrescriptions(patientId: string): Promise<PrescriptionDocument[]> {
+  async getPatientPrescriptions(
+    patientId: string,
+  ): Promise<PrescriptionDocument[]> {
     return this.prescriptionModel
       .find({ patientId: new Types.ObjectId(patientId) })
       .populate('items.drug')
@@ -125,7 +133,9 @@ export class PrescriptionsService {
       .lean();
   }
 
-  async getDoctorPrescriptions(doctorId: string): Promise<PrescriptionDocument[]> {
+  async getDoctorPrescriptions(
+    doctorId: string,
+  ): Promise<PrescriptionDocument[]> {
     return this.prescriptionModel
       .find({ doctorId: new Types.ObjectId(doctorId) })
       .populate('items.drug patientId')
@@ -137,14 +147,18 @@ export class PrescriptionsService {
     return this.findOneOrFail(prescriptionId);
   }
 
-
   private async findOneOrFail(id: string): Promise<PrescriptionDocument> {
-    const doc = await this.prescriptionModel.findById(id).populate('items.drug');
+    const doc = await this.prescriptionModel
+      .findById(id)
+      .populate('items.drug');
     if (!doc) throw new NotFoundException('Prescription not found');
     return doc;
   }
 
-  private assertDoctor(prescription: PrescriptionDocument, doctorId: string): void {
+  private assertDoctor(
+    prescription: PrescriptionDocument,
+    doctorId: string,
+  ): void {
     if (prescription.doctorId.toString() !== doctorId) {
       throw new ForbiddenException('You are not the prescribing doctor');
     }

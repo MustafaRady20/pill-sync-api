@@ -25,7 +25,9 @@ export class EmailService {
     this.logger.log(`Email sent to ${to}: ${subject}`);
   }
 
-  async sendNotificationEmail(notification: NotificationDocument): Promise<void> {
+  async sendNotificationEmail(
+    notification: NotificationDocument,
+  ): Promise<void> {
     if (!notification.userId) {
       this.logger.warn(
         `Notification ${notification._id} has type email/both but no userId set.`,
@@ -39,7 +41,6 @@ export class EmailService {
       userId: notification.userId,
     });
 
-    
     await this.sendEmail(notification.userId, notification.title, html);
   }
 }

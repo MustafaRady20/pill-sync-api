@@ -3,8 +3,15 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 
 import { EmailService } from '../../email/email.service';
-import { NOTIFICATIONS_QUEUE, NotificationsService, SEND_NOTIFICATION_JOB } from '../notifications.service';
-import { NotificationStatus, NotificationType } from 'src/common/enums/notification-type.enum';
+import {
+  NOTIFICATIONS_QUEUE,
+  NotificationsService,
+  SEND_NOTIFICATION_JOB,
+} from '../notifications.service';
+import {
+  NotificationStatus,
+  NotificationType,
+} from 'src/common/enums/notification-type.enum';
 import { NotificationDocument } from '../schema/notification.schema';
 import { PushService } from 'src/infrastructure/push/push.service';
 
@@ -30,7 +37,8 @@ export class NotificationProcessor extends WorkerHost {
     const { notificationId } = job.data;
     this.logger.log(`Processing notification: ${notificationId}`);
 
-    const notification = await this.notificationsService.findById(notificationId);
+    const notification =
+      await this.notificationsService.findById(notificationId);
 
     await Promise.all(this.buildTasks(notification));
 

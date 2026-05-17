@@ -5,7 +5,6 @@ import * as path from 'path';
 import { DrugService } from 'src/modules/drug/drug.service';
 import { DrugForm, DrugRoute } from 'src/modules/drug/schemas/drug.schema';
 
-
 function normalizeForm(form?: string) {
   if (!form) return 'other';
 
@@ -19,7 +18,7 @@ function normalizeForm(form?: string) {
   if (value.includes('drop')) return 'drops';
   if (value.includes('patch')) return 'patch';
   if (value.includes('inhal')) return 'inhaler';
-  if(value.includes('suppository')) return 'suppository';
+  if (value.includes('suppository')) return 'suppository';
 
   return 'other';
 }
@@ -35,12 +34,11 @@ function normalizeRoute(route?: string) {
   if (value.includes('sc')) return 'SC';
   if (value.includes('topical')) return 'topical';
   if (value.includes('inhal')) return 'inhalation';
-  if (value.includes("rectal")) return 'rectal';
-  if(value.includes("sublingual")) return "sublingual"
+  if (value.includes('rectal')) return 'rectal';
+  if (value.includes('sublingual')) return 'sublingual';
 
-  return "other"
+  return 'other';
 }
-
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -53,10 +51,10 @@ async function bootstrap() {
 
   const sheet = workbook.Sheets['Dim1'];
 
-  console.log(sheet)
+  console.log(sheet);
   const rows = xlsx.utils.sheet_to_json<any>(sheet);
 
-  console.log(rows.length)
+  console.log(rows.length);
   for (const row of rows) {
     const tradeName = row['Trade Name']?.toString().trim();
     const genericName = row['Generic Name']?.toString().trim();

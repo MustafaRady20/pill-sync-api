@@ -13,7 +13,6 @@ export enum DrugDrugRelation {
 
 @Schema({ timestamps: true })
 export class DrugDrugInteraction {
-
   @Prop({ type: Types.ObjectId, ref: 'Drug', required: true, index: true })
   drug_a: Types.ObjectId;
 
@@ -21,7 +20,7 @@ export class DrugDrugInteraction {
   drug_b: Types.ObjectId;
 
   @Prop({ type: String, required: true, enum: DrugDrugRelation })
-    relation: DrugDrugRelation;
+  relation: DrugDrugRelation;
 
   @Prop({ type: String, required: true, enum: DrugInteractionSeverity })
   severity: DrugInteractionSeverity;
@@ -39,6 +38,7 @@ export class DrugDrugInteraction {
   source?: string;
 }
 
-export const DrugDrugInteractionSchema = SchemaFactory.createForClass(DrugDrugInteraction);
+export const DrugDrugInteractionSchema =
+  SchemaFactory.createForClass(DrugDrugInteraction);
 
 DrugDrugInteractionSchema.index({ drug_a: 1, drug_b: 1 }, { unique: true });

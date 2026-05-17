@@ -1,6 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { NotificationStatus, NotificationType } from '../../../common/enums/notification-type.enum';
+import {
+  NotificationStatus,
+  NotificationType,
+} from '../../../common/enums/notification-type.enum';
 
 export type NotificationDocument = Notification & Document;
 
@@ -18,7 +21,11 @@ export class Notification {
   @Prop({ required: true, enum: NotificationType })
   type: NotificationType;
 
-  @Prop({ required: true, default: NotificationStatus.PENDING, enum: NotificationStatus })
+  @Prop({
+    required: true,
+    default: NotificationStatus.PENDING,
+    enum: NotificationStatus,
+  })
   status: NotificationStatus;
 
   @Prop()

@@ -27,10 +27,7 @@ export class DrugService {
     return this.cacheService.getOrSet(
       'drugs:list',
       async () => {
-        return this.drugModel
-          .find()
-          .sort({ tradeName: 1 })
-          .lean();
+        return this.drugModel.find().sort({ tradeName: 1 }).lean();
       },
       300,
     );
@@ -68,9 +65,11 @@ export class DrugService {
   }
 
   async update(id: string, dto: UpdateDrugDto): Promise<Drug> {
-    const drug = await this.drugModel.findByIdAndUpdate(id, dto, {
-      new: true,
-    }).lean();
+    const drug = await this.drugModel
+      .findByIdAndUpdate(id, dto, {
+        new: true,
+      })
+      .lean();
 
     if (!drug) {
       throw new NotFoundException('Drug not found');

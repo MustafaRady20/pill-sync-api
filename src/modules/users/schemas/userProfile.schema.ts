@@ -11,7 +11,10 @@ export type DiseaseSeverity = 'mild' | 'moderate' | 'severe';
 
 @Schema({ _id: false })
 export class MedicalCondition {
-  @ApiProperty({ example: 'CV', description: 'Disease category code from Dim4' })
+  @ApiProperty({
+    example: 'CV',
+    description: 'Disease category code from Dim4',
+  })
   @Prop({ type: String, required: true })
   categoryCode: string;
 
@@ -42,7 +45,8 @@ export class MedicalCondition {
   @Prop({ type: mongoose.Schema.Types.Mixed, default: {} })
   extraAnswers: Record<string, any>;
 }
-export const MedicalConditionSchema = SchemaFactory.createForClass(MedicalCondition);
+export const MedicalConditionSchema =
+  SchemaFactory.createForClass(MedicalCondition);
 
 // ─── Drug & Food Allergy ──────────────────────────────────────────────────────
 

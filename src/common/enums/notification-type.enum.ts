@@ -4,7 +4,6 @@ export enum NotificationType {
   BOTH = 'both',
 }
 
-
 export enum NotificationStatus {
   PENDING = 'pending',
   SENT = 'sent',

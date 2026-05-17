@@ -4,8 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class RefreshTokenDto {
   @ApiProperty({
     description: 'JWT Refresh Token',
-    example:
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
   @IsString()
   refreshToken: string;

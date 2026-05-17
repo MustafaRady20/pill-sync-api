@@ -17,20 +17,30 @@ export enum AuthProvider {
 
 @Schema({ timestamps: true })
 export class User {
- 
   @ApiProperty({ example: 'user@gmail.com' })
-  @Prop({ required: true, unique: true, index: true, lowercase: true, trim: true })
+  @Prop({
+    required: true,
+    unique: true,
+    index: true,
+    lowercase: true,
+    trim: true,
+  })
   email: string;
 
   @ApiProperty({ example: '+1234567890', required: false })
   @Prop({ unique: true, index: true, sparse: true, trim: true })
   phoneNumber?: string;
 
-  @Prop({ select: false }) 
+  @Prop({ select: false })
   password?: string;
 
   @ApiProperty({ enum: UserRole, default: UserRole.PATIENT })
-  @Prop({ type: String, enum: UserRole, default: UserRole.PATIENT, index: true })
+  @Prop({
+    type: String,
+    enum: UserRole,
+    default: UserRole.PATIENT,
+    index: true,
+  })
   role: UserRole;
 
   @ApiProperty({ example: 'google-oauth-id', required: false })
@@ -58,8 +68,7 @@ export class User {
   hasCompletedOnboarding: boolean;
 
   @Prop({ default: null })
-  refreshToken: string; 
+  refreshToken: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-

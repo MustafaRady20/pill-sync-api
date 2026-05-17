@@ -22,7 +22,6 @@ import { FileUploadModule } from './infrastructure/file-upload/file-upload.modul
 import { NotesModule } from './modules/notes/notes.module';
 import { VitalSignsModule } from './modules/vital-sign/vital-sign.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),

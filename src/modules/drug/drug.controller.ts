@@ -17,8 +17,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { DrugDocument } from './schemas/drug.schema';
 
 @ApiTags('Drugs')
-@UseGuards(AuthGuard("jwt"))
-@ApiBearerAuth("accessToken")
+@UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth('accessToken')
 @Controller('drugs')
 export class DrugController {
   constructor(private readonly drugService: DrugService) {}

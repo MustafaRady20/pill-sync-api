@@ -8,7 +8,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { VerificationCode, VerificationCodeDocument } from './schema/verification.code.schema';
+import {
+  VerificationCode,
+  VerificationCodeDocument,
+} from './schema/verification.code.schema';
 import { EmailService } from 'src/infrastructure/email/email.service';
 import { verificationEmailTemplate } from 'src/infrastructure/email/templates/verification.template';
 
@@ -23,7 +26,7 @@ export class VerificationService {
     @InjectModel(VerificationCode.name)
     private readonly verificationModel: Model<VerificationCodeDocument>,
 
-    private readonly emailService: EmailService ,
+    private readonly emailService: EmailService,
   ) {}
 
   // ─── Send ────────────────────────────────────────────────────────────────────
@@ -36,9 +39,7 @@ export class VerificationService {
     });
 
     // Generate a 6-digit numeric code
-    const plainCode = crypto
-      .randomInt(100_000, 999_999)
-      .toString();
+    const plainCode = crypto.randomInt(100_000, 999_999).toString();
 
     // Hash before storing — never store plain codes
     const hashedCode = await bcrypt.hash(plainCode, 10);

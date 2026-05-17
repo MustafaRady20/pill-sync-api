@@ -31,7 +31,10 @@ export class CreateNotificationDto {
   type: NotificationType;
 
   @ApiPropertyOptional({ example: 'user@example.com' })
-  @ValidateIf((o) => o.type === NotificationType.EMAIL || o.type === NotificationType.BOTH)
+  @ValidateIf(
+    (o) =>
+      o.type === NotificationType.EMAIL || o.type === NotificationType.BOTH,
+  )
   @IsEmail()
   email?: string;
 

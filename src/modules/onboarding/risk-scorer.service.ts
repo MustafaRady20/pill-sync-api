@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { OnboardingQuestion, OnboardingQuestionCategory } from './schema/onboarding-question.schema';
-
+import {
+  OnboardingQuestion,
+  OnboardingQuestionCategory,
+} from './schema/onboarding-question.schema';
 
 @Injectable()
 export class RiskScorerService {
-
   private readonly CATEGORY_WEIGHTS: Record<string, number> = {
     [OnboardingQuestionCategory.ALLERGIES]: 80,
     [OnboardingQuestionCategory.CHRONIC_DISEASES]: 70,
@@ -17,16 +18,27 @@ export class RiskScorerService {
   };
 
   private readonly HIGH_RISK_KEYWORDS = [
-    'anaphylaxis', 'anaphylactic',
-    'heart failure', 'renal failure', 'kidney failure', 'liver failure',
-    'cancer', 'diabetes', 'epilepsy', 'seizure',
-    'stroke', 'hypertension', 'asthma',
-    'penicillin', 'aspirin', 'warfarin',
+    'anaphylaxis',
+    'anaphylactic',
+    'heart failure',
+    'renal failure',
+    'kidney failure',
+    'liver failure',
+    'cancer',
+    'diabetes',
+    'epilepsy',
+    'seizure',
+    'stroke',
+    'hypertension',
+    'asthma',
+    'penicillin',
+    'aspirin',
+    'warfarin',
   ];
 
   score(question: OnboardingQuestion, value: unknown): number {
-
-    if (value === false || value === null || value === '' || value === 0) return 0;
+    if (value === false || value === null || value === '' || value === 0)
+      return 0;
 
     const base = this.CATEGORY_WEIGHTS[question.category] ?? 5;
     const text = this.valueToString(value).toLowerCase();

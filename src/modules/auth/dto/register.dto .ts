@@ -38,7 +38,6 @@ export class RegisterDto {
   @IsNotEmpty()
   password: string;
 
-
   @ApiPropertyOptional({
     example: '109384029384029384',
   })

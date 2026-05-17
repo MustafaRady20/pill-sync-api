@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-export type VerificationCodeDocument = VerificationCode & Document;
+export type PasswordResetCodeDocument = PasswordResetCode & Document;
 
 @Schema({ timestamps: true })
-export class VerificationCode {
+export class PasswordResetCode {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   userId: Types.ObjectId;
 
@@ -21,5 +21,5 @@ export class VerificationCode {
   attempts: number;
 }
 
-export const VerificationCodeSchema =
-  SchemaFactory.createForClass(VerificationCode);
+export const PasswordResetCodeSchema =
+  SchemaFactory.createForClass(PasswordResetCode);

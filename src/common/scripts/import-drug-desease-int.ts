@@ -76,7 +76,9 @@ async function bootstrap() {
       },
     );
 
-    console.log(`Imported drug-disease relation: ${drugCode} -> ${diseaseCode}`);
+    console.log(
+      `Imported drug-disease relation: ${drugCode} -> ${diseaseCode}`,
+    );
   }
 
   console.log('Drug disease interactions completed');

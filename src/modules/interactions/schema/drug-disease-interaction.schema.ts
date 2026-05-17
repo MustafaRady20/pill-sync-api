@@ -11,7 +11,6 @@ export enum DrugDiseaseRelation {
   SAFE = 'safe',
 }
 
-
 export enum InteractionSeverity {
   MILD = 'mild',
   MODERATE = 'moderate',
@@ -39,7 +38,6 @@ export class DrugDiseaseInteraction {
   @Prop({ type: String })
   recommendedDose?: string;
 
-
   @Prop({ type: String })
   reasoning?: string;
 
@@ -54,6 +52,11 @@ export class DrugDiseaseInteraction {
   mechanism?: string;
 }
 
-export const DrugDiseaseInteractionSchema = SchemaFactory.createForClass(DrugDiseaseInteraction);
+export const DrugDiseaseInteractionSchema = SchemaFactory.createForClass(
+  DrugDiseaseInteraction,
+);
 
-DrugDiseaseInteractionSchema.index({ drug: 1, disease: 1, relation: 1 }, { unique: true });
+DrugDiseaseInteractionSchema.index(
+  { drug: 1, disease: 1, relation: 1 },
+  { unique: true },
+);

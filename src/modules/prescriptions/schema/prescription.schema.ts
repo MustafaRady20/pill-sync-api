@@ -4,10 +4,10 @@ import { Document, Types } from 'mongoose';
 export type PrescriptionDocument = Prescription & Document;
 
 export enum PrescriptionStatus {
-  DRAFT = 'draft',        
-  ACTIVE = 'active',      
+  DRAFT = 'draft',
+  ACTIVE = 'active',
   COMPLETED = 'completed',
-  CANCELLED = 'cancelled', 
+  CANCELLED = 'cancelled',
 }
 
 export class PrescriptionItem {
@@ -38,7 +38,12 @@ export class Prescription {
   @Prop({ type: [PrescriptionItem], required: true, default: [] })
   items: PrescriptionItem[];
 
-  @Prop({ type: String, enum: PrescriptionStatus, default: PrescriptionStatus.DRAFT, index: true })
+  @Prop({
+    type: String,
+    enum: PrescriptionStatus,
+    default: PrescriptionStatus.DRAFT,
+    index: true,
+  })
   status: PrescriptionStatus;
 
   @Prop({ type: Date })
@@ -49,7 +54,6 @@ export class Prescription {
 
   @Prop({ type: String })
   notes?: string;
-
 
   @Prop({
     type: {
@@ -83,7 +87,6 @@ export class Prescription {
       description: string;
     }>;
   };
-
 
   @Prop({ type: Boolean, default: false })
   safetyOverride: boolean;

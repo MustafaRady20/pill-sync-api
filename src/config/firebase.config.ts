@@ -3,11 +3,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export function initializeFirebase(): void {
-  if (admin.apps.length > 0) return; 
+  if (admin.apps.length > 0) return;
 
   const filePath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 
- if (!filePath) {
+  if (!filePath) {
     throw new Error('FIREBASE_SERVICE_ACCOUNT_PATH env variable is not set');
   }
 

@@ -8,10 +8,13 @@ import { UserProfile, UserProfileSchema } from './schemas/userProfile.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }, { name: UserProfile.name, schema: UserProfileSchema }])
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: UserProfile.name, schema: UserProfileSchema },
+    ]),
   ],
   controllers: [UserController],
   providers: [UsersService],
   exports: [UsersService],
 })
-export class UserModule { }
+export class UserModule {}

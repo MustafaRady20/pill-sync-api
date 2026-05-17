@@ -1,10 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsOptional,
-  IsString,
-  ArrayUnique,
-} from 'class-validator';
+import { IsArray, IsOptional, IsString, ArrayUnique } from 'class-validator';
 
 export class CreateDiseaseDto {
   @ApiProperty({
@@ -30,4 +25,3 @@ export class CreateDiseaseDto {
   @IsOptional()
   similarNames?: string[];
 }
-

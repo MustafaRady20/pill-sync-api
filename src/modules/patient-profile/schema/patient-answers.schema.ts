@@ -8,15 +8,12 @@ export class PatientAnswer {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   patientId: Types.ObjectId;
 
-
   @Prop({ required: true, index: true })
   questionKey: string;
-
 
   @Prop({ type: MongooseSchema.Types.Mixed, required: true })
   value: string | number | boolean | string[];
 
- 
   @Prop({ type: MongooseSchema.Types.Mixed, default: null })
   normalizedValue?: string | string[];
 

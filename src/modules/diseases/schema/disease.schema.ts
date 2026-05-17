@@ -14,16 +14,16 @@ export class Disease {
   @Prop({ type: [String], default: [] })
   similarNames: string[];
 
-  @Prop({ type:String, })
+  @Prop({ type: String })
   familyCode: string;
 
-  @Prop({ type:String, })
+  @Prop({ type: String })
   family: string;
 
-  @Prop({type:String,  })
+  @Prop({ type: String })
   parentCode?: string;
 
-  @Prop({type:Number })
+  @Prop({ type: Number })
   level: number;
 }
 

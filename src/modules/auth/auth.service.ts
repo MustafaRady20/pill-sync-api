@@ -42,7 +42,6 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
-    
     const user = await this.usersService.create(dto);
     const tokens = await this.generateTokens(user);
 
@@ -59,10 +58,10 @@ export class AuthService {
     return {
       user: user.toJSON(),
       ...tokens,
-      message: 'Account created. Please check your email for a 6-digit verification code.',
+      message:
+        'Account created. Please check your email for a 6-digit verification code.',
     };
   }
-
 
   async verifyEmail(dto: VerifyEmailDto) {
     const user = await this.usersService.findByEmail(dto.email);
@@ -77,18 +76,17 @@ export class AuthService {
 
     await this.verificationService.verifyCode(user._id.toString(), dto.code);
 
-  
     await this.usersService.markEmailVerified(user._id.toString());
 
     return { message: 'Email verified successfully.' };
   }
 
-
   async resendVerificationCode(email: string) {
     const user = await this.usersService.findByEmail(email);
 
     if (!user) throw new BadRequestException('User not found.');
-    if (user.isEmailVerified) throw new BadRequestException('Email already verified.');
+    if (user.isEmailVerified)
+      throw new BadRequestException('Email already verified.');
 
     await this.verificationService.sendVerificationCode(
       user._id.toString(),
@@ -98,20 +96,22 @@ export class AuthService {
     return { message: 'A new verification code has been sent to your email.' };
   }
 
+  async login(user: UserDocument) {
+    const tokens = await this.generateTokens(user);
+    await this.usersService.updateRefreshToken(
+      user._id.toString(),
+      tokens.refreshToken,
+    );
 
-async login(user: UserDocument) {
-  const tokens = await this.generateTokens(user);
-  await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
+    const profile = await this.usersService.getProfile(user._id.toString());
 
-  const profile = await this.usersService.getProfile(user._id.toString());
-
-  return {
-    user: user.toJSON(),
-    ...tokens,
-    onboardingStep: profile?.onboardingStep ?? 0,
-    hasCompletedOnboarding: user.hasCompletedOnboarding,
-  };
-}
+    return {
+      user: user.toJSON(),
+      ...tokens,
+      onboardingStep: profile?.onboardingStep ?? 0,
+      hasCompletedOnboarding: user.hasCompletedOnboarding,
+    };
+  }
 
   async googleAuth(idToken: string) {
     const ticket = await this.googleClient
@@ -125,18 +125,23 @@ async login(user: UserDocument) {
 
     const payload = ticket.getPayload();
     if (!payload?.email) {
-      throw new BadRequestException('Could not extract profile from Google token');
+      throw new BadRequestException(
+        'Could not extract profile from Google token',
+      );
     }
 
     const user = await this.usersService.findOrCreateGoogleUser({
       googleId: payload.sub,
       email: payload.email,
       name: payload.name ?? payload.email.split('@')[0],
-      avatar: payload.picture || "",
+      avatar: payload.picture || '',
     });
 
     const tokens = await this.generateTokens(user);
-    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
+    await this.usersService.updateRefreshToken(
+      user._id.toString(),
+      tokens.refreshToken,
+    );
     return { user: user.toJSON(), ...tokens };
   }
 
@@ -156,7 +161,10 @@ async login(user: UserDocument) {
     if (!user || !user.isActive) throw new UnauthorizedException();
 
     const tokens = await this.generateTokens(user);
-    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
+    await this.usersService.updateRefreshToken(
+      user._id.toString(),
+      tokens.refreshToken,
+    );
     return tokens;
   }
 

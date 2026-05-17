@@ -3,9 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Model } from 'mongoose';
 import { Queue } from 'bullmq';
-import { Notification, NotificationDocument } from './schema/notification.schema';
+import {
+  Notification,
+  NotificationDocument,
+} from './schema/notification.schema';
 import { CreateNotificationDto } from './dtos/create-notification.dto';
-
 
 export const SEND_NOTIFICATION_JOB = 'send-notification';
 export const NOTIFICATIONS_QUEUE = 'notifications';
@@ -22,7 +24,9 @@ export class NotificationsService {
     private readonly notificationQueue: Queue,
   ) {}
 
-  async createNotification(dto: CreateNotificationDto): Promise<NotificationDocument> {
+  async createNotification(
+    dto: CreateNotificationDto,
+  ): Promise<NotificationDocument> {
     const notification = await this.notificationModel.create(dto);
 
     await this.notificationQueue.add(
@@ -32,7 +36,7 @@ export class NotificationsService {
         attempts: 5,
         backoff: { type: 'exponential', delay: 5000 },
         removeOnComplete: true,
-        removeOnFail: 100, 
+        removeOnFail: 100,
       },
     );
 

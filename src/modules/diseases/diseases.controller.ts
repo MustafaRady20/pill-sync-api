@@ -1,12 +1,6 @@
 // disease.controller.ts
 
-import {
-  Controller,
-  Get,
-  Query,
-  Param,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Query, Param, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -20,20 +14,19 @@ import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
 
 @ApiTags('Diseases')
-@ApiBearerAuth("accessToken")
-  @UseGuards(JwtAuthGuard)
+@ApiBearerAuth('accessToken')
+@UseGuards(JwtAuthGuard)
 @Controller('diseases')
 export class DiseaseController {
   constructor(private readonly service: DiseaseService) {}
 
- 
   @Get('search')
   @ApiOperation({ summary: 'Search diseases with ranking' })
   @ApiQuery({
     name: 'q',
     example: 'hypertension',
     description: 'Search query',
-    required:false
+    required: false,
   })
   @ApiResponse({
     status: 200,
@@ -41,7 +34,7 @@ export class DiseaseController {
     type: [Disease],
   })
   search(@Query('q') q?: string) {
-    if(q){
+    if (q) {
       return this.service.search(q);
     }
     return this.service.findAll();

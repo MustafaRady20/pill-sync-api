@@ -23,11 +23,7 @@ export class CacheService {
     await this.redis.del(key);
   }
 
-  async getOrSet<T>(
-    key: string,
-    cb: () => Promise<T>,
-    ttl = 300,
-  ): Promise<T> {
+  async getOrSet<T>(key: string, cb: () => Promise<T>, ttl = 300): Promise<T> {
     const cached = await this.get<T>(key);
 
     if (cached) {

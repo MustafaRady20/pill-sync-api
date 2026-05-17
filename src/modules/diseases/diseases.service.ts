@@ -17,7 +17,7 @@ export class DiseaseService {
     private diseaseModel: Model<Disease>,
   ) {}
 
-  async findAll(){
+  async findAll() {
     return this.diseaseModel.find().exec();
   }
 
@@ -116,6 +116,4 @@ export class DiseaseService {
       { upsert: true },
     );
   }
-
-
 }

@@ -31,9 +31,11 @@ import { RolesGuard } from 'src/modules/auth/guards/role.guard';
 import { UserRole } from 'src/modules/users/schemas/user.schema';
 import { Roles } from 'src/modules/auth/decorators/roles.decorator';
 import { DrugDiseaseService } from './drug-disease-interaction.service';
-import { DrugDiseaseRelation, InteractionSeverity } from './schema/drug-disease-interaction.schema';
+import {
+  DrugDiseaseRelation,
+  InteractionSeverity,
+} from './schema/drug-disease-interaction.schema';
 import { DrugDrugRelation } from './schema/drug-drug-interaction.schema';
-
 
 // Drug–Drug Interactions
 
@@ -64,7 +66,10 @@ export class DrugDrugController {
 
   @Get('drug/:drugId')
   @Roles(UserRole.ADMIN, UserRole.DOCTOR)
-  @ApiOperation({ summary: 'All interactions involving a specific drug (either side of the pair)' })
+  @ApiOperation({
+    summary:
+      'All interactions involving a specific drug (either side of the pair)',
+  })
   findForDrug(@Param('drugId') drugId: string) {
     return this.drugDrugService.findForDrug(drugId);
   }
@@ -72,12 +77,17 @@ export class DrugDrugController {
   @Get('pair')
   @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ summary: 'Check interaction between a specific drug pair' })
-  @ApiQuery({ name: 'drugA', required: true, description: 'First drug ObjectId' })
-  @ApiQuery({ name: 'drugB', required: true, description: 'Second drug ObjectId' })
-  findForPair(
-    @Query('drugA') drugA: string,
-    @Query('drugB') drugB: string,
-  ) {
+  @ApiQuery({
+    name: 'drugA',
+    required: true,
+    description: 'First drug ObjectId',
+  })
+  @ApiQuery({
+    name: 'drugB',
+    required: true,
+    description: 'Second drug ObjectId',
+  })
+  findForPair(@Query('drugA') drugA: string, @Query('drugB') drugB: string) {
     return this.drugDrugService.findForPair(drugA, drugB);
   }
 
@@ -92,12 +102,10 @@ export class DrugDrugController {
   @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({
     summary: '[Admin/Doctor] Update interaction metadata',
-    description: 'Drug pair is immutable. Only severity, description, mechanism, managementAdvice, source can be updated.',
+    description:
+      'Drug pair is immutable. Only severity, description, mechanism, managementAdvice, source can be updated.',
   })
-  update(
-    @Param('id') id: string,
-    @Body() dto: UpdateDrugDrugInteractionDto,
-  ) {
+  update(@Param('id') id: string, @Body() dto: UpdateDrugDrugInteractionDto) {
     return this.drugDrugService.update(id, dto);
   }
 
@@ -132,7 +140,9 @@ export class DrugDiseaseController {
 
   @Get()
   @Roles(UserRole.ADMIN, UserRole.DOCTOR)
-  @ApiOperation({ summary: 'List all drug–disease interactions, optionally filtered' })
+  @ApiOperation({
+    summary: 'List all drug–disease interactions, optionally filtered',
+  })
   @ApiQuery({ name: 'relation', enum: DrugDiseaseRelation, required: false })
   @ApiQuery({ name: 'severity', enum: InteractionSeverity, required: false })
   findAll(
@@ -144,7 +154,10 @@ export class DrugDiseaseController {
 
   @Get('drug/:drugId')
   @Roles(UserRole.ADMIN, UserRole.DOCTOR)
-  @ApiOperation({ summary: 'All interactions for a drug (indications, contraindications, side effects)' })
+  @ApiOperation({
+    summary:
+      'All interactions for a drug (indications, contraindications, side effects)',
+  })
   @ApiQuery({ name: 'relation', enum: DrugDrugRelation, required: false })
   findForDrug(
     @Param('drugId') drugId: string,
@@ -175,7 +188,8 @@ export class DrugDiseaseController {
   @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({
     summary: '[Admin/Doctor] Update interaction metadata',
-    description: 'Drug and disease refs are immutable. Only clinical metadata can be updated.',
+    description:
+      'Drug and disease refs are immutable. Only clinical metadata can be updated.',
   })
   update(
     @Param('id') id: string,

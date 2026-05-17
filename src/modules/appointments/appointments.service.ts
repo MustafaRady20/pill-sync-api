@@ -1,14 +1,17 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
-import { Appointment, AppointmentDocument } from "./schemas/appointments.schema";
-import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import {
+  Appointment,
+  AppointmentDocument,
+} from './schemas/appointments.schema';
+import { CreateAppointmentDto } from './dtos/create-appointment.dto';
 
 @Injectable()
 export class AppointmentsService {
   constructor(
     @InjectModel(Appointment.name)
-    private readonly appointmentModel: Model<AppointmentDocument>
+    private readonly appointmentModel: Model<AppointmentDocument>,
   ) {}
 
   async create(dto: CreateAppointmentDto): Promise<AppointmentDocument> {
@@ -22,7 +25,7 @@ export class AppointmentsService {
   async findAll(): Promise<AppointmentDocument[]> {
     return this.appointmentModel
       .find()
-      .populate("patientId", "name email")
+      .populate('patientId', 'name email')
       .exec();
   }
 
@@ -35,14 +38,18 @@ export class AppointmentsService {
   async findOne(id: string): Promise<AppointmentDocument> {
     const appointment = await this.appointmentModel
       .findById(id)
-      .populate("patientId", "name email")
+      .populate('patientId', 'name email')
       .exec();
 
-    if (!appointment) throw new NotFoundException(`Appointment #${id} not found`);
+    if (!appointment)
+      throw new NotFoundException(`Appointment #${id} not found`);
     return appointment;
   }
 
-  async update(id: string, dto: Partial<CreateAppointmentDto>): Promise<AppointmentDocument> {
+  async update(
+    id: string,
+    dto: Partial<CreateAppointmentDto>,
+  ): Promise<AppointmentDocument> {
     const updated = await this.appointmentModel
       .findByIdAndUpdate(id, dto, { new: true })
       .exec();

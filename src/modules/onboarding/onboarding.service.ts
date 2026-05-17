@@ -1,15 +1,23 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { OnboardingQuestion, OnboardingQuestionCategory, OnboardingQuestionDocument } from './schema/onboarding-question.schema';
-import { PatientAnswer, PatientAnswerDocument } from 'src/modules/patient-profile/schema/patient-answers.schema';
+import {
+  OnboardingQuestion,
+  OnboardingQuestionCategory,
+  OnboardingQuestionDocument,
+} from './schema/onboarding-question.schema';
+import {
+  PatientAnswer,
+  PatientAnswerDocument,
+} from 'src/modules/patient-profile/schema/patient-answers.schema';
 import { User, UserDocument } from 'src/modules/users/schemas/user.schema';
 import { RiskScorerService } from './risk-scorer.service';
 import { AllergyExtractorService } from './allergy-extractor.service';
 import { SubmitAnswersDto } from './dto/submit-answers.dto';
-
-
-
 
 @Injectable()
 export class OnboardingService {
@@ -31,10 +39,11 @@ export class OnboardingService {
       .lean();
   }
 
-  async createQuestion(data: Partial<OnboardingQuestion>): Promise<OnboardingQuestionDocument> {
+  async createQuestion(
+    data: Partial<OnboardingQuestion>,
+  ): Promise<OnboardingQuestionDocument> {
     return this.questionModel.create(data);
   }
-
 
   // async submitAnswers(patientId: string, dto: SubmitAnswersDto): Promise<{ message: string }> {
   //   const questions = await this.questionModel.find({ isActive: true }).lean();
@@ -52,7 +61,6 @@ export class OnboardingService {
   //     const question = questionMap.get(answer.questionKey);
   //     if (!question) throw new BadRequestException(`Unknown question key: ${answer.questionKey}`);
 
-
   //     return {
   //       updateOne: {
   //         filter: { patientId: new Types.ObjectId(patientId), questionKey: answer.questionKey },
@@ -69,7 +77,6 @@ export class OnboardingService {
   //   });
 
   //   await this.answerModel.bulkWrite(upsertOps);
-
 
   //   const allergyAnswers = dto.answers.filter((a) => {
   //     const q = questionMap.get(a.questionKey);
@@ -90,7 +97,6 @@ export class OnboardingService {
   //       })
   //       .filter(Boolean) as any[];
 
-     
   //   }
 
   //   // 5. Mark onboarding complete
@@ -100,14 +106,17 @@ export class OnboardingService {
   // }
 
   async getPatientAnswers(patientId: string): Promise<PatientAnswerDocument[]> {
-    return this.answerModel.find({ patientId: new Types.ObjectId(patientId) }).lean();
+    return this.answerModel
+      .find({ patientId: new Types.ObjectId(patientId) })
+      .lean();
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
   private normalize(value: unknown): string | string[] | undefined {
     if (typeof value === 'string') return value.toLowerCase().trim();
-    if (Array.isArray(value)) return value.map((v) => String(v).toLowerCase().trim());
+    if (Array.isArray(value))
+      return value.map((v) => String(v).toLowerCase().trim());
     return undefined;
   }
 }

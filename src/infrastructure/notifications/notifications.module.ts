@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BullModule } from '@nestjs/bullmq';
 
-import { NotificationsService, NOTIFICATIONS_QUEUE } from './notifications.service';
+import {
+  NotificationsService,
+  NOTIFICATIONS_QUEUE,
+} from './notifications.service';
 import { NotificationsController } from './notifications.controller';
 import { NotificationProcessor } from './processors/notification.processor';
 import { EmailModule } from '../email/email.module';

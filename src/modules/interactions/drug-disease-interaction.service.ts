@@ -5,9 +5,16 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { DrugDiseaseInteraction, DrugDiseaseInteractionDocument, DrugDiseaseRelation, InteractionSeverity } from './schema/drug-disease-interaction.schema';
-import { CreateDrugDiseaseInteractionDto, UpdateDrugDiseaseInteractionDto } from './dtos/drug-disease-interaction.dto';
-
+import {
+  DrugDiseaseInteraction,
+  DrugDiseaseInteractionDocument,
+  DrugDiseaseRelation,
+  InteractionSeverity,
+} from './schema/drug-disease-interaction.schema';
+import {
+  CreateDrugDiseaseInteractionDto,
+  UpdateDrugDiseaseInteractionDto,
+} from './dtos/drug-disease-interaction.dto';
 
 @Injectable()
 export class DrugDiseaseService {
@@ -69,7 +76,6 @@ export class DrugDiseaseService {
     return doc;
   }
 
-
   async findForDrug(
     drugId: string,
     relation?: DrugDiseaseRelation,
@@ -84,12 +90,13 @@ export class DrugDiseaseService {
       .lean();
   }
 
-
   async findForDisease(
     diseaseId: string,
     relation?: DrugDiseaseRelation,
   ): Promise<DrugDiseaseInteractionDocument[]> {
-    const query: Record<string, any> = { disease: new Types.ObjectId(diseaseId) };
+    const query: Record<string, any> = {
+      disease: new Types.ObjectId(diseaseId),
+    };
     if (relation) query.relation = relation;
 
     return this.model
@@ -98,7 +105,6 @@ export class DrugDiseaseService {
       .sort({ relation: 1, severity: 1 })
       .lean();
   }
-
 
   async findContraindicationsForPatient(
     drugIds: string[],
@@ -111,14 +117,16 @@ export class DrugDiseaseService {
         drug: { $in: drugIds.map((id) => new Types.ObjectId(id)) },
         disease: { $in: diseaseIds.map((id) => new Types.ObjectId(id)) },
         relation: {
-          $in: [DrugDiseaseRelation.CONTRAINDICATION, DrugDiseaseRelation.CAUTION],
+          $in: [
+            DrugDiseaseRelation.CONTRAINDICATION,
+            DrugDiseaseRelation.CAUTION,
+          ],
         },
       })
       .populate('drug', 'tradeName genericName')
       .populate('disease', 'name')
       .lean();
   }
-
 
   async findIndicationsForDrugs(
     drugIds: string[],
@@ -138,7 +146,6 @@ export class DrugDiseaseService {
     id: string,
     dto: UpdateDrugDiseaseInteractionDto,
   ): Promise<DrugDiseaseInteractionDocument> {
-
     const { drug, disease, ...updateData } = dto;
 
     const doc = await this.model
@@ -150,9 +157,9 @@ export class DrugDiseaseService {
     return doc;
   }
 
-
   async delete(id: string): Promise<void> {
     const result = await this.model.findByIdAndDelete(id);
-    if (!result) throw new NotFoundException('Drug–disease interaction not found');
+    if (!result)
+      throw new NotFoundException('Drug–disease interaction not found');
   }
 }

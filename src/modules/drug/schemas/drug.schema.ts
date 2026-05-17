@@ -103,11 +103,14 @@ export class Drug {
   @Prop()
   pharmacokinetics?: string;
 
-  
   @Prop({ type: Object })
-  rawData?: Record<string, any>; 
+  rawData?: Record<string, any>;
 }
 
 export const DrugSchema = SchemaFactory.createForClass(Drug);
 DrugSchema.index({ genericName: 1, form: 1 });
-DrugSchema.index({ tradeName: 'text', genericName: 'text', similarTradeNames: 'text' }); 
+DrugSchema.index({
+  tradeName: 'text',
+  genericName: 'text',
+  similarTradeNames: 'text',
+});

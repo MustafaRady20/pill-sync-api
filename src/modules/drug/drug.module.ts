@@ -12,10 +12,10 @@ const DrugMongooseModule = MongooseModule.forFeature([
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Drug.name, schema: DrugSchema }]),
-    CacheModule
+    CacheModule,
   ],
   providers: [DrugService],
   controllers: [DrugController],
-  exports: [DrugService,DrugMongooseModule],
+  exports: [DrugService, DrugMongooseModule],
 })
 export class DrugModule {}

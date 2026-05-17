@@ -18,14 +18,15 @@ import { JwtAuthGuard } from './guards/jwt.auth.guard';
 import { LoginDto } from './dto/login.dto';
 import { ApiOperation } from '@nestjs/swagger';
 import { SendVerificationDto, VerifyEmailDto } from './dto/verifiyEmail.dto';
-import { VerificationService } from './verification/verification.service';
-import { UsersService } from 'src/modules/users/users.service';
+import { PasswordResetService } from './password-reset.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
-
+    private passwordResetService: PasswordResetService,
   ) {}
 
   @Post('register')
@@ -47,10 +48,28 @@ export class AuthController {
     return this.authService.resendVerificationCode(dto.email);
   }
 
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request a password reset code' })
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.passwordResetService.forgotPassword(dto.email);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password using the code' })
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.passwordResetService.resetPassword(
+      dto.email,
+      dto.code,
+      dto.newPassword,
+    );
+  }
+
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@CurrentUser() user: userSchema.UserDocument, @Body() dto: LoginDto) {
+  async login(@CurrentUser() user: userSchema.UserDocument) {
     console.log('Logging in user:', user.email);
     return this.authService.login(user);
   }
